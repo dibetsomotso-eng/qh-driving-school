@@ -1,0 +1,127 @@
+"use client";
+
+import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { toast } from "@/hooks/use-toast";
+
+import { Icons } from "@/components/icons";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { navLinks } from "@/lib/data";
+
+const newsletterSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email address." }),
+});
+
+type NewsletterFormValues = z.infer<typeof newsletterSchema>;
+
+export function Footer() {
+  const form = useForm<NewsletterFormValues>({
+    resolver: zodResolver(newsletterSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
+
+  function onSubmit(data: NewsletterFormValues) {
+    // Here you would typically send the data to your backend/CRM
+    console.log(data);
+    toast({
+      title: "Subscribed!",
+      description: "Thanks for joining our newsletter.",
+    });
+    form.reset();
+  }
+
+  return (
+    <footer className="bg-accent text-accent-foreground">
+      <div className="container py-12 px-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Brand and Contact Info */}
+          <div className="md:col-span-2">
+            <Icons.Logo />
+            <p className="mt-4 text-sm text-muted-foreground max-w-md text-accent-foreground/80">
+              We Teach You to Drive Step by Step.
+            </p>
+            <div className="mt-6 space-y-2 text-sm">
+              <p>
+                <a href="tel:+27733813197" className="hover:text-primary transition-colors">+27 73 381 3197</a>
+              </p>
+              <p>
+                <a href="tel:+27788332283" className="hover:text-primary transition-colors">+27 78 833 2283</a>
+              </p>
+              <p>
+                <a href="mailto:henrymteb@gmail.com" className="hover:text-primary transition-colors">henrymteb@gmail.com</a>
+              </p>
+               <a
+                href="https://wa.me/27733813197"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 pt-2 font-semibold text-primary"
+              >
+                <Icons.Whatsapp className="h-5 w-5" />
+                Chat on WhatsApp
+              </a>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="font-headline font-bold text-lg">Quick Links</h4>
+            <ul className="mt-4 space-y-2">
+              {navLinks.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="text-sm hover:text-primary transition-colors text-accent-foreground/80">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <Link href="/booking" className="text-sm hover:text-primary transition-colors text-accent-foreground/80">
+                  Book a Lesson
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Newsletter */}
+          <div>
+            <h4 className="font-headline font-bold text-lg">Newsletter</h4>
+            <p className="mt-4 text-sm text-accent-foreground/80">
+              Get driving tips and special offers directly in your inbox.
+            </p>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4 flex gap-2">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem className="flex-grow">
+                      <FormControl>
+                        <Input
+                          placeholder="Your email"
+                          {...field}
+                          className="bg-background/20 border-border/50 text-accent-foreground placeholder:text-accent-foreground/60"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" variant="primary" className="bg-primary text-primary-foreground">
+                  Subscribe
+                </Button>
+              </form>
+            </Form>
+          </div>
+        </div>
+        <div className="mt-8 border-t border-border/20 pt-6 text-center text-sm text-accent-foreground/60">
+          <p>&copy; {new Date().getFullYear()} QH Driving School. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  );
+}

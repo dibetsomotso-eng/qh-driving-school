@@ -1,3 +1,148 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "home-hero",
+      "description": "A learner driver focused on the road, seen from the passenger seat.",
+      "imageUrl": "https://images.unsplash.com/photo-1524645343120-a4ae9f7d4343?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxsZWFybmVyJTIwZHJpdmVyfGVufDB8fHx8MTc1OTc3NTUzNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "learner driver"
+    },
+    {
+      "id": "about-founder",
+      "description": "Portrait of Henry Qoli Mtebula, founder of QH Driving School.",
+      "imageUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwcm9mZXNzaW9uYWwlMjBtYW58ZW58MHx8fHwxNzU5NzIyNTgwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "professional man"
+    },
+    {
+      "id": "about-instructors",
+      "description": "A group of friendly driving instructors standing together.",
+      "imageUrl": "https://images.unsplash.com/photo-1619662413798-367880946883?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8ZHJpdmluZyUyMGluc3RydWN0b3JzfGVufDB8fHx8MTc1OTc3NTUzNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "driving instructors"
+    },
+    {
+      "id": "about-students",
+      "description": "A diverse group of happy students holding their new driver's licenses.",
+      "imageUrl": "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxoYXBweSUyMHN0dWRlbnRzfGVufDB8fHx8MTc1OTc0Nzk0N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "happy students"
+    },
+    {
+      "id": "service-online-booking",
+      "description": "A person booking a lesson on a laptop.",
+      "imageUrl": "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxvbmxpbmUlMjBib29raW5nfGVufDB8fHx8MTc1OTc3NTUzNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "online booking"
+    },
+    {
+      "id": "service-renewals",
+      "description": "Close up of a driver's license card.",
+      "imageUrl": "https://images.unsplash.com/photo-1585314062528-0c3742fa6102?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bGljZW5zZSUyMGNhcmR8ZW58MHx8fHwxNzU5Nzc1NTM1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "license card"
+    },
+    {
+      "id": "service-code-ab-eb",
+      "description": "A person riding a motorcycle on an open road.",
+      "imageUrl": "https://images.unsplash.com/photo-1719556763642-9c2a07130f42?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bW90b3JjeWNsZSUyMGRyaXZpbmd8ZW58MHx8fHwxNzU5Nzc1NTM1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "motorcycle driving"
+    },
+    {
+      "id": "service-code-c1-ec",
+      "description": "A medium-sized truck driving on a highway.",
+      "imageUrl": "https://images.unsplash.com/photo-1485575301924-6891ef935dcd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx0cnVjayUyMGRyaXZpbmd8ZW58MHx8fHwxNzU5Nzc1NTM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "truck driving"
+    },
+    {
+      "id": "service-prdp",
+      "description": "A professional driver in a passenger vehicle.",
+      "imageUrl": "https://images.unsplash.com/photo-1718434137166-b3cb7d944b27?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwcm9mZXNzaW9uYWwlMjBkcml2ZXJ8ZW58MHx8fHwxNzU5Nzc1NTM1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "professional driver"
+    },
+    {
+      "id": "service-learners-drivers",
+      "description": "An instructor pointing at a road sign to a student.",
+      "imageUrl": "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkcml2aW5nJTIwbGVzc29ufGVufDB8fHx8MTc1OTcwMzExMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "driving lesson"
+    },
+    {
+      "id": "service-card-issuing",
+      "description": "A new, freshly printed driver's license card.",
+      "imageUrl": "https://images.unsplash.com/photo-1736680260959-e43f2cdf676e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxuZXclMjBsaWNlbnNlfGVufDB8fHx8MTc1OTc3NTUzNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "new license"
+    },
+    {
+      "id": "service-guaranteed-pass",
+      "description": "A student smiling and giving a thumbs up after passing their test.",
+      "imageUrl": "https://images.unsplash.com/photo-1614492898637-435e0f87cef8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwYXNzaW5nJTIwdGVzdHxlbnwwfHx8fDE3NTk3NzU1MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "passing test"
+    },
+    {
+      "id": "blog-1",
+      "description": "A car's dashboard with a focus on the steering wheel and road ahead.",
+      "imageUrl": "https://images.unsplash.com/photo-1629015346993-2c1aa5d94cb3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkcml2aW5nJTIwdmlld3xlbnwwfHx8fDE3NTk3NzU1MzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "driving view"
+    },
+    {
+      "id": "blog-2",
+      "description": "A parallel parking maneuver shown from a top-down angle.",
+      "imageUrl": "https://images.unsplash.com/photo-1649880985757-b3a7733e3786?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwYXJhbGxlbCUyMHBhcmtpbmd8ZW58MHx8fHwxNzU5NzcxNDE3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "parallel parking"
+    },
+    {
+      "id": "blog-3",
+      "description": "A road with multiple traffic signs.",
+      "imageUrl": "https://images.unsplash.com/photo-1572670014853-1d3a3f22b40f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyb2FkJTIwc2lnbnN8ZW58MHx8fHwxNzU5NjcyNDUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "road signs"
+    },
+    {
+      "id": "gallery-1",
+      "description": "Happy student holding a driver's license.",
+      "imageUrl": "https://images.unsplash.com/photo-1617111841710-c7a3afc2d3b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxoYXBweSUyMGRyaXZlcnxlbnwwfHx8fDE3NTk3NzU1MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "happy driver"
+    },
+    {
+      "id": "gallery-2",
+      "description": "Instructor giving a thumbs up to a student.",
+      "imageUrl": "https://images.unsplash.com/photo-1599768431736-c78b881ae983?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxkcml2aW5nJTIwaW5zdHJ1Y3RvcnxlbnwwfHx8fDE3NTk3NzU1MzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "driving instructor"
+    },
+    {
+      "id": "gallery-3",
+      "description": "QH Driving School branded car.",
+      "imageUrl": "https://images.unsplash.com/photo-1631267569010-89ce07804eb1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8YnJhbmRlZCUyMGNhcnxlbnwwfHx8fDE3NTk2OTM4OTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "branded car"
+    },
+    {
+      "id": "gallery-4",
+      "description": "Student practicing a three-point turn.",
+      "imageUrl": "https://images.unsplash.com/photo-1648573688136-de51ced7aa0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkcml2aW5nJTIwbWFuZXV2ZXJ8ZW58MHx8fHwxNzU5Nzc1NTM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "driving maneuver"
+    },
+    {
+      "id": "gallery-5",
+      "description": "Close-up of hands on a steering wheel.",
+      "imageUrl": "https://images.unsplash.com/photo-1582020410793-531b809cc5e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxzdGVlcmluZyUyMHdoZWVsfGVufDB8fHx8MTc1OTc2MjI1Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "steering wheel"
+    },
+    {
+      "id": "gallery-6",
+      "description": "Student receiving a certificate of completion.",
+      "imageUrl": "https://images.unsplash.com/photo-1623068285726-21b0fcabe7f8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxkcml2aW5nJTIwY2VydGlmaWNhdGV8ZW58MHx8fHwxNzU5Nzc1NTM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "driving certificate"
+    },
+    {
+      "id": "gallery-7",
+      "description": "A group of students posing for a photo.",
+      "imageUrl": "https://images.unsplash.com/photo-1569617084133-26942bb441f2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8c3R1ZGVudCUyMGdyb3VwfGVufDB8fHx8MTc1OTcyNzY4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "student group"
+    },
+    {
+      "id": "gallery-8",
+      "description": "A view from inside the car during a lesson.",
+      "imageUrl": "https://images.unsplash.com/photo-1621639532859-8b26570b96fc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjYXIlMjBpbnRlcmlvcnxlbnwwfHx8fDE3NTk2ODM3NzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "car interior"
+    },
+    {
+      "id": "contact-map",
+      "description": "A map showing the location of QH Driving School in Roodepoort.",
+      "imageUrl": "https://images.unsplash.com/photo-1717700299581-c2fc3fad4ee8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjaXR5JTIwbWFwfGVufDB8fHx8MTc1OTcxNjc0M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "city map"
+    }
+  ]
 }
