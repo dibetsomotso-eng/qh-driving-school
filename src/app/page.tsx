@@ -104,17 +104,21 @@ export default function Home() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-headline font-bold">Why Choose QH Driving School?</h2>
-              <p className="mt-2 text-muted-foreground">Your success is our priority.</p>
+              <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">Your success is our priority. We stand out by offering a supportive, professional, and effective learning environment.</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {whyChooseUs.map((feature) => (
-                <div key={feature.title} className="p-6">
-                  <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary mx-auto mb-4">
-                    <feature.icon className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-xl font-bold">{feature.title}</h3>
-                  <p className="mt-2 text-muted-foreground">{feature.description}</p>
-                </div>
+                <Card key={feature.title} className="text-center shadow-lg hover:shadow-xl transition-shadow duration-300">
+                  <CardHeader className="items-center">
+                    <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary mb-4">
+                      <feature.icon className="h-8 w-8" />
+                    </div>
+                    <CardTitle>{feature.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">{feature.description}</p>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
