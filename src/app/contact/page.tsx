@@ -184,6 +184,10 @@ export default function ContactPage() {
                     <Phone className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                     <span>+27 78 833 2283</span>
                   </a>
+                  <a href="tel:+27108259488" className="flex items-center gap-4 group">
+                    <Phone className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <span>+27 10 825 9488</span>
+                  </a>
                   <a href="mailto:henrymteb@gmail.com" className="flex items-center gap-4 group">
                     <Mail className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                     <span>henrymteb@gmail.com</span>

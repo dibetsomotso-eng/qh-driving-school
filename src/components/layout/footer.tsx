@@ -54,6 +54,9 @@ export function Footer() {
                 <a href="tel:+27788332283" className="hover:text-primary transition-colors">+27 78 833 2283</a>
               </p>
               <p>
+                <a href="tel:+27108259488" className="hover:text-primary transition-colors">+27 10 825 9488</a>
+              </p>
+              <p>
                 <a href="mailto:henrymteb@gmail.com" className="hover:text-primary transition-colors">henrymteb@gmail.com</a>
               </p>
                <a
