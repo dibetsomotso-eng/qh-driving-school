@@ -4,6 +4,7 @@ import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore'
+import { getAnalytics, isSupported } from "firebase/analytics";
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
@@ -33,10 +34,24 @@ export function initializeFirebase() {
 }
 
 export function getSdks(firebaseApp: FirebaseApp) {
+  const firestore = getFirestore(firebaseApp);
+  const auth = getAuth(firebaseApp);
+  
+  // Conditionally initialize Analytics only in the browser and if supported
+  let analytics = null;
+  if (typeof window !== 'undefined') {
+    isSupported().then(supported => {
+      if (supported) {
+        analytics = getAnalytics(firebaseApp);
+      }
+    });
+  }
+
   return {
     firebaseApp,
-    auth: getAuth(firebaseApp),
-    firestore: getFirestore(firebaseApp)
+    auth,
+    firestore,
+    analytics,
   };
 }
 
