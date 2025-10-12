@@ -27,6 +27,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { PlusCircle, Edit, Trash2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 export default function AdminDashboard() {
   const firestore = useFirestore();
@@ -42,21 +44,29 @@ export default function AdminDashboard() {
 
   const { data: posts, isLoading } = useCollection<BlogPost>(postsQuery);
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!firestore || !postToDelete) return;
 
+    const docRef = doc(firestore, 'blogPosts', postToDelete);
     setIsDeleting(postToDelete);
-    try {
-      await deleteDoc(doc(firestore, 'blogPosts', postToDelete));
-      toast({ title: 'Success', description: 'Blog post deleted.' });
-    } catch (error) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not delete post.' });
-      console.error(error);
-    } finally {
-      setIsDeleting(null);
-      setPostToDelete(null);
-      setShowDeleteAlert(false);
-    }
+
+    deleteDoc(docRef)
+      .then(() => {
+        toast({ title: 'Success', description: 'Blog post deleted.' });
+      })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'delete',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not delete post.' });
+      })
+      .finally(() => {
+        setIsDeleting(null);
+        setPostToDelete(null);
+        setShowDeleteAlert(false);
+      });
   };
 
   const confirmDelete = (postId: string) => {

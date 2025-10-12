@@ -16,6 +16,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 const postSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -90,7 +92,7 @@ function EditPostForm() {
   }, [postRef, postId, form, toast]);
 
 
-  const onSubmit = async (data: PostFormValues) => {
+  const onSubmit = (data: PostFormValues) => {
     if (!firestore) return;
     setIsLoading(true);
 
@@ -101,20 +103,38 @@ function EditPostForm() {
       publishedAt: new Date().toISOString(),
     };
 
-    try {
-      if (postId && postRef) {
-        await setDoc(postRef, postData, { merge: true });
-        toast({ title: 'Success', description: 'Post updated successfully.' });
-      } else {
-        await addDoc(collection(firestore, 'blogPosts'), postData);
-        toast({ title: 'Success', description: 'Post created successfully.' });
-      }
-      router.push('/admin');
-    } catch (error) {
-      console.error('Error saving post:', error);
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not save post.' });
-    } finally {
-      setIsLoading(false);
+    if (postId && postRef) {
+        setDoc(postRef, postData, { merge: true })
+            .then(() => {
+                toast({ title: 'Success', description: 'Post updated successfully.' });
+                router.push('/admin');
+            })
+            .catch(async (error) => {
+                const permissionError = new FirestorePermissionError({
+                    path: postRef.path,
+                    operation: 'update',
+                    requestResourceData: postData,
+                });
+                errorEmitter.emit('permission-error', permissionError);
+                toast({ variant: 'destructive', title: 'Error', description: 'Could not update post.' });
+                setIsLoading(false);
+            });
+    } else {
+        addDoc(collection(firestore, 'blogPosts'), postData)
+            .then(() => {
+                toast({ title: 'Success', description: 'Post created successfully.' });
+                router.push('/admin');
+            })
+            .catch(async (error) => {
+                const permissionError = new FirestorePermissionError({
+                    path: 'blogPosts',
+                    operation: 'create',
+                    requestResourceData: postData,
+                });
+                errorEmitter.emit('permission-error', permissionError);
+                toast({ variant: 'destructive', title: 'Error', description: 'Could not create post.' });
+                setIsLoading(false);
+            });
     }
   };
 
