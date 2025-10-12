@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -26,7 +25,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Icons } from "@/components/icons";
 
 const contactFormSchema = z.object({
@@ -40,8 +38,6 @@ const contactFormSchema = z.object({
 type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 export default function ContactPage() {
-  const mapImage = PlaceHolderImages.find((img) => img.id === 'contact-map');
-  
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
@@ -61,6 +57,9 @@ export default function ContactPage() {
     });
     form.reset();
   }
+  
+  const mapEmbedUrl = "https://www.google.com/maps/embed/v1/place?key=&q=59%20Mare%20Street%2C%20Roodepoort%2C%201727%2C%20South%20Africa";
+
 
   return (
     <>
@@ -211,18 +210,18 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {mapImage && (
-        <section className="w-full h-[400px]">
-          <Image
-            src={mapImage.imageUrl}
-            alt={mapImage.description}
-            width={1200}
-            height={400}
-            className="w-full h-full object-cover"
-            data-ai-hint={mapImage.imageHint}
-          />
-        </section>
-      )}
+      <section className="w-full h-[400px]">
+        <iframe
+          src={mapEmbedUrl}
+          width="100%"
+          height="100%"
+          style={{ border: 0 }}
+          allowFullScreen={false}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          title="Location of QH Driving School"
+        ></iframe>
+      </section>
     </>
   );
 }
