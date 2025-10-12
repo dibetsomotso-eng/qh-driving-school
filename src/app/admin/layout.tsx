@@ -2,7 +2,7 @@
 
 import { useUser, useAuth } from '@/firebase';
 import { useRouter, usePathname } from 'next/navigation';
-import { useEffect, useState, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -30,11 +30,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  // While firebase is checking for the user, show a loader
   if (isUserLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
@@ -42,18 +41,18 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const isAdmin = user?.email === 'admin@example.com';
   const isLoginPage = pathname === '/admin/login';
 
-  // If user is logged in as admin
+  // Case 1: User is an authenticated admin.
   if (isAdmin) {
-    // and they are on the login page, redirect them to the dashboard
+    // If admin is on the login page, redirect them to the dashboard.
     if (isLoginPage) {
       router.replace('/admin');
-      return ( // Return loader while redirecting
-        <div className="flex h-screen items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
+      return ( // Render a loader while redirecting.
+        <div className="flex h-screen w-full items-center justify-center bg-background">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
       );
     }
-    // otherwise, they are an admin on an admin page, show the admin layout
+    // If admin is on any other admin page, show the admin layout.
     return (
       <div className="min-h-screen bg-background">
         <AdminHeader />
@@ -62,17 +61,25 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  // If user is not an admin
-  // and they are not on the login page, redirect them to login
-  if (!isLoginPage) {
-    router.replace('/admin/login');
-    return ( // Return loader while redirecting
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
+  // Case 2: User is not an admin (or is logged out).
+  if (!isAdmin) {
+    // If the user is on a protected admin page, redirect to login.
+    if (!isLoginPage) {
+      router.replace('/admin/login');
+       return ( // Render a loader while redirecting.
+        <div className="flex h-screen w-full items-center justify-center bg-background">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      );
+    }
+    // If the user is on the login page, just show the login page content.
+    return <>{children}</>;
   }
 
-  // otherwise, they are a non-admin on the login page, just show the login page content
-  return <>{children}</>;
+  // This should not be reached, but provides a fallback loader.
+  return (
+    <div className="flex h-screen w-full items-center justify-center bg-background">
+      <Loader2 className="h-12 w-12 animate-spin text-primary" />
+    </div>
+  );
 }
