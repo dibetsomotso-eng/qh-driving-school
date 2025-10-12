@@ -81,7 +81,7 @@
     {
       "id": "blog-2",
       "description": "A parallel parking maneuver shown from a top-down angle.",
-      "imageUrl": "https://images.unsplash.com/photo-1648573688136-de51ced7aa0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkcml2aW5nJTIwbWFuZXV2ZXJ8ZW58MHx8fHwxNzU5Nzc1NTM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1648573688136-de51ced7aa0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkcml2aW5nJTIwbWFuZXV2ZXJ8ZW58MHx8fHwxNzU5Nzc1NTM0fDA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "parallel parking"
     },
     {
@@ -110,9 +110,9 @@
     },
     {
       "id": "gallery-4",
-      "description": "Student practicing a three-point turn.",
-      "imageUrl": "https://images.unsplash.com/photo-1648573688136-de51ced7aa0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkcml2aW5nJTIwbWFuZXV2ZXJ8ZW58MHx8fHwxNzU5Nzc1NTM0fDA&ixlibrb-4.1.0&q=80&w=1080",
-      "imageHint": "driving maneuver"
+      "description": "Another happy student with their license.",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Gallery%2FHappy%20Student%204.jpg?alt=media",
+      "imageHint": "happy student"
     },
     {
       "id": "gallery-5",
