@@ -93,7 +93,7 @@
     {
       "id": "gallery-1",
       "description": "Happy student holding a driver's license.",
-      "imageUrl": "https://images.unsplash.com/photo-1617111841710-c7a3afc2d3b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxoYXBweSUyMGRyaXZlcnxlbnwwfHx8fDE3NTk3NzU1MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Gallery%2FHappy%20Student%201.jpg?alt=media",
       "imageHint": "happy driver"
     },
     {
@@ -141,7 +141,7 @@
     {
       "id": "contact-map",
       "description": "A map showing the location of QH Driving School in Roodepoort.",
-      "imageUrl": "https://images.unsplash.com/photo-1717700299581-c2fc3fad4ee8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjaXR5JTIwbWFwfGVufDB8fHx8MTc1OTcxNjc0M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1717700299581-c2fc3fad4ee8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjaXR5JTIwbWFwfGVufDB8fHx8MTc1OTcxNjc0M3ww&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "city map"
     }
   ]
