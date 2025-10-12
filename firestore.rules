@@ -1,58 +1,89 @@
 /**
- * @file Firestore Security Rules for QH Driving School.
+ * @file Overview
+ * This ruleset governs access to the Firestore database for a driving school application.
  *
- * @core_philosophy This ruleset allows public read and write access to the bookings, testimonials,
- * and subscribers collections. No authentication is required for any operation.
+ * Core Philosophy:
+ * The ruleset prioritizes security by default. Data access is explicitly granted based on
+ * the specific collection and operation. Unauthenticated access is permitted for creating
+ * "Contact Submissions" as well as "Subscribers" and is denied for all other collections.
  *
- * @data_structure Data is stored in three top-level collections: /bookings, /testimonials, and /subscribers.
+ * Data Structure:
+ * - `/bookings/{bookingId}`: Stores booking requests.
+ * - `/contactSubmissions/{contactId}`: Stores contact form submissions.
+ * - `/subscribers/{subscriberId}`: Stores newsletter subscribers.
+ * - `/testimonials/{testimonialId}`: Stores testimonial submissions.
  *
- * @key_security_decisions All collections are publicly readable and writable. This is suitable for
- * capturing data from public forms.
+ * Key Security Decisions:
+ * - Unauthenticated users can create Contact Submissions and subscribe to the newsletter.
+ * - All other read and write operations require authentication and are denied by default.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Allows public read and write access to the bookings collection.
+     * @description Controls access to booking submissions.
      * @path /bookings/{bookingId}
-     * @allow (create) Any unauthenticated user can create a booking.
-     * @allow (get, list) Any unauthenticated user can read a booking.
-     * @deny (update, delete) No one can update or delete a booking.
-     * @principle Allows unauthenticated users to submit booking requests.
+     * @allow (create) - Denied to all users because authentication is required.
+     * @deny (create) - Unauthenticated user attempts to create a booking.
+     * @principle Authentication required for booking submissions.
      */
     match /bookings/{bookingId} {
-      allow get, list: if true;
-      allow create: if true;
-      allow update, delete: if false;
+      allow get: if false;
+      allow list: if false;
+      allow create: if isSignedIn();
+      allow update: if false;
+      allow delete: if false;
     }
 
     /**
-     * @description Allows public read and write access to the testimonials collection.
-     * @path /testimonials/{testimonialId}
-     * @allow (create) Any unauthenticated user can create a testimonial.
-     * @allow (get, list) Any unauthenticated user can read a testimonial.
-     * @deny (update, delete) No one can update or delete a testimonial.
-     * @principle Allows unauthenticated users to submit testimonials.
+     * @description Controls access to contact submissions.
+     * @path /contactSubmissions/{contactId}
+     * @allow (create) - Allows unauthenticated users to submit contact forms.
+     * @deny (update) - Denies authenticated users from updating contact submissions.
+     * @principle Allows unauthenticated contact form submissions.
      */
-    match /testimonials/{testimonialId} {
-      allow get, list: if true;
+    match /contactSubmissions/{contactId} {
+      allow get: if false;
+      allow list: if false;
       allow create: if true;
-      allow update, delete: if false;
+      allow update: if false;
+      allow delete: if false;
     }
 
     /**
-     * @description Allows public read and write access to the subscribers collection.
+     * @description Controls access to newsletter subscribers.
      * @path /subscribers/{subscriberId}
-     * @allow (create) Any unauthenticated user can create a subscriber.
-     * @allow (get, list) Any unauthenticated user can read a subscriber.
-     * @deny (update, delete) No one can update or delete a subscriber.
-     * @principle Allows unauthenticated users to subscribe to the newsletter.
+     * @allow (create) - Allows unauthenticated users to subscribe to the newsletter.
+     * @deny (update) - Denies authenticated users from updating subscriber information.
+     * @principle Allows unauthenticated newsletter subscriptions.
      */
     match /subscribers/{subscriberId} {
-      allow get, list: if true;
+      allow get: if false;
+      allow list: if false;
       allow create: if true;
-      allow update, delete: if false;
+      allow update: if false;
+      allow delete: if false;
     }
+
+    /**
+     * @description Controls access to testimonial submissions.
+     * @path /testimonials/{testimonialId}
+     * @allow (create) - Denied to all users, authentication is required.
+     * @deny (create) - Unauthenticated user attempts to create a testimonial.
+     * @principle Authentication required for testimonial submissions.
+     */
+    match /testimonials/{testimonialId} {
+      allow get: if false;
+      allow list: if false;
+      allow create: if isSignedIn();
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+
+  // Helper function to determine if a user is signed in.
+  function isSignedIn() {
+    return request.auth != null;
   }
 }
