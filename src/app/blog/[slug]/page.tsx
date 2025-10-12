@@ -13,8 +13,7 @@ import { useEffect, useState } from 'react';
 import { type BlogPost, blogPosts as fallbackPosts } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export default function BlogPostPage({ params: { slug } }: { params: { slug: string } }) {
   const firestore = useFirestore();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
