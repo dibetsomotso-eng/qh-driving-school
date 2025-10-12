@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Icons } from '@/components/icons';
 import { navLinks } from '@/lib/data';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export function Header() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -34,7 +35,8 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+           <ThemeToggle />
            <Button asChild className="hidden md:inline-flex">
             <Link href="/booking">Book Now</Link>
           </Button>
