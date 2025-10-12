@@ -4,25 +4,39 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useCollection } from '@/firebase';
-import { collection, query, orderBy, where } from 'firebase/firestore';
+import { collection, query, orderBy } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
-import type { BlogPost } from '@/lib/data';
+import { type BlogPost, blogPosts as fallbackPosts } from '@/lib/data';
 import { useMemoFirebase } from '@/firebase/provider';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useEffect, useState } from 'react';
 
 export default function BlogPage() {
   const firestore = useFirestore();
+  const [displayPosts, setDisplayPosts] = useState<BlogPost[]>([]);
 
   const postsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(
       collection(firestore, 'blogPosts'),
-      where('publishedAt', '<=', new Date().toISOString()),
       orderBy('publishedAt', 'desc')
     );
   }, [firestore]);
 
-  const { data: posts, isLoading } = useCollection<BlogPost>(postsQuery);
+  const { data: posts, isLoading, error } = useCollection<BlogPost>(postsQuery);
+
+  useEffect(() => {
+    if (!isLoading) {
+      // If there's an error or no posts from Firestore, use the fallback data.
+      if (error || !posts || posts.length === 0) {
+        // Sort fallback posts just in case they aren't in order
+        const sortedFallback = [...fallbackPosts].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+        setDisplayPosts(sortedFallback);
+      } else {
+        setDisplayPosts(posts);
+      }
+    }
+  }, [posts, isLoading, error]);
 
   return (
     <>
@@ -41,9 +55,11 @@ export default function BlogPage() {
             {isLoading && Array.from({ length: 3 }).map((_, i) => (
               <Card key={i} className="flex flex-col overflow-hidden shadow-lg">
                 <Skeleton className="w-full h-48" />
-                <CardContent className="p-6 flex-grow">
+                <CardHeader className="p-6">
                   <Skeleton className="h-4 w-1/4 mb-2" />
                   <Skeleton className="h-6 w-full mb-2" />
+                </CardHeader>
+                <CardContent>
                   <Skeleton className="h-4 w-full" />
                    <Skeleton className="h-4 w-full mt-1" />
                 </CardContent>
@@ -52,9 +68,10 @@ export default function BlogPage() {
                 </CardFooter>
               </Card>
             ))}
-            {posts?.map((post) => {
+            {!isLoading && displayPosts.map((post) => {
+              const postSlug = post.slug || post.title.toLowerCase().replace(/ /g, '-');
               return (
-                <Card key={post.id} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <Card key={post.id || postSlug} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <CardHeader className="p-0">
                     {post.imageUrl && (
                       <Image
@@ -76,13 +93,18 @@ export default function BlogPage() {
                   </CardContent>
                   <CardFooter className="p-6 pt-0">
                     <Button variant="outline" asChild>
-                      <Link href={`/blog/${post.slug}`}>Read More</Link>
+                      <Link href={`/blog/${postSlug}`}>Read More</Link>
                     </Button>
                   </CardFooter>
                 </Card>
               );
             })}
           </div>
+           {(!isLoading && displayPosts.length === 0) && (
+              <div className="text-center col-span-full">
+                  <p className="text-muted-foreground">No blog posts found. Check back later!</p>
+              </div>
+            )}
         </div>
       </section>
     </>

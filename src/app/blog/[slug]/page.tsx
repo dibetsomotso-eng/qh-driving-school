@@ -3,14 +3,14 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useMemoFirebase } from '@/firebase/provider';
 import { useFirestore } from '@/firebase';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import type { BlogPost } from '@/lib/data';
+import { type BlogPost, blogPosts as fallbackPosts } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function BlogPostPage({ params }: { params: { slug: string } }) {
@@ -29,35 +29,48 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   }, [firestore, params.slug]);
 
   useEffect(() => {
-    if (!postQuery) return;
-
     const fetchPost = async () => {
-      try {
-        setIsLoading(true);
-        const snapshot = await getDocs(postQuery);
-        if (snapshot.empty) {
-          setError(true);
-        } else {
-          const doc = snapshot.docs[0];
-          setPost({ ...doc.data() as BlogPost, id: doc.id });
+      setIsLoading(true);
+      setError(false);
+
+      // Try fetching from Firestore first
+      if (postQuery) {
+        try {
+          const snapshot = await getDocs(postQuery);
+          if (!snapshot.empty) {
+            const doc = snapshot.docs[0];
+            setPost({ ...doc.data() as BlogPost, id: doc.id });
+            setIsLoading(false);
+            return; // Exit if found in Firestore
+          }
+        } catch (err) {
+          console.error("Firestore fetch failed, falling back to local data.", err);
+          // Don't set error state here, allow fallback
         }
-      } catch (err) {
-        console.error(err);
-        setError(true);
-      } finally {
-        setIsLoading(false);
       }
+      
+      // Fallback to local data if Firestore fetch fails or returns empty
+      const fallbackPost = fallbackPosts.find(p => p.slug === params.slug);
+      if (fallbackPost) {
+        setPost(fallbackPost);
+      } else {
+        setError(true); // Only set error if not found in fallback either
+      }
+
+      setIsLoading(false);
     };
 
     fetchPost();
 
-  }, [postQuery]);
+  }, [postQuery, params.slug]);
 
   if (isLoading) {
     return (
         <div className="container mx-auto px-4 py-16 md:py-24 max-w-4xl">
             <Skeleton className="h-12 w-32 mb-8" />
-            <Skeleton className="h-[40vh] w-full mb-8" />
+            <div className="relative w-full h-[40vh] md:h-[50vh] mb-8">
+              <Skeleton className="w-full h-full" />
+            </div>
             <Skeleton className="h-8 w-3/4 mb-4" />
             <Skeleton className="h-6 w-1/2 mb-8" />
             <div className="space-y-4">
