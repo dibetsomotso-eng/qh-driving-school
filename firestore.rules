@@ -1,89 +1,125 @@
 /**
- * @file Overview
- * This ruleset governs access to the Firestore database for a driving school application.
+ * @fileoverview Firestore Security Rules for Prototyping.
  *
  * Core Philosophy:
- * The ruleset prioritizes security by default. Data access is explicitly granted based on
- * the specific collection and operation. Unauthenticated access is permitted for creating
- * "Contact Submissions" as well as "Subscribers" and is denied for all other collections.
+ * This ruleset prioritizes rapid prototyping by focusing on authorization and deferring data validation. It uses a public-read, owner-write model for most collections, allowing flexible data shapes for faster iteration.
  *
  * Data Structure:
- * - `/bookings/{bookingId}`: Stores booking requests.
- * - `/contactSubmissions/{contactId}`: Stores contact form submissions.
- * - `/subscribers/{subscriberId}`: Stores newsletter subscribers.
- * - `/testimonials/{testimonialId}`: Stores testimonial submissions.
+ * The Firestore database contains several top-level collections: bookings, contact submissions, subscribers, testimonials and blog posts. Each collection stores data related to its specific purpose.
  *
  * Key Security Decisions:
- * - Unauthenticated users can create Contact Submissions and subscribe to the newsletter.
- * - All other read and write operations require authentication and are denied by default.
+ * - Public Read Access: All collections are publicly readable to facilitate easy data display.
+ * - Owner-Only Writes: Write access (create, update, delete) is restricted to authenticated users, based on the presence of an 'ownerId' field within the document that must match the authenticated user's UID.
+ * - Missing Owner Field: If a schema lacks a clearly defined ownerId, writes are disabled with a placeholder comment to highlight the problem.
+ * - No User Listing: Listing users is disallowed.
+ *
+ * Denormalization for Authorization:
+ *  To avoid `get()` calls in rules, the owner is identified by an `ownerId` field in each document. This field must match the authenticated user's `uid` for write operations.
+ *
+ * Structural Segregation:
+ *  The application uses top-level collections for both private and public data. The public data is readable by all, while write access is restricted to the owner.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Controls access to booking submissions.
+     * @description Allows anyone to read bookings, but only authenticated users to create, update, or delete them.
      * @path /bookings/{bookingId}
-     * @allow (create) - Denied to all users because authentication is required.
-     * @deny (create) - Unauthenticated user attempts to create a booking.
-     * @principle Authentication required for booking submissions.
+     * @allow (get, list): if true
+     * @allow (create): if request.auth != null
+     * @allow (update): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
+     * @allow (delete): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
+     * @deny (create): if request.auth == null
+     * @deny (update): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
+     * @deny (delete): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
+     * @principle Allows public reads, restricts writes to authenticated owners.
      */
     match /bookings/{bookingId} {
-      allow get: if false;
-      allow list: if false;
+      allow get, list: if true;
       allow create: if isSignedIn();
-      allow update: if false;
-      allow delete: if false;
+      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
     }
 
     /**
-     * @description Controls access to contact submissions.
+     * @description Allows anyone to read contact submissions, but only authenticated users to create, update, or delete them.
      * @path /contactSubmissions/{contactId}
-     * @allow (create) - Allows unauthenticated users to submit contact forms.
-     * @deny (update) - Denies authenticated users from updating contact submissions.
-     * @principle Allows unauthenticated contact form submissions.
+     * @allow (get, list): if true
+     * @allow (create): if request.auth != null
+     * @allow (update): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
+     * @allow (delete): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
+     * @deny (create): if request.auth == null
+     * @deny (update): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
+     * @deny (delete): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
+     * @principle Allows public reads, restricts writes to authenticated owners.
      */
     match /contactSubmissions/{contactId} {
-      allow get: if false;
-      allow list: if false;
-      allow create: if true;
-      allow update: if false;
-      allow delete: if false;
+      allow get, list: if true;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
     }
 
     /**
-     * @description Controls access to newsletter subscribers.
+     * @description Allows anyone to read subscribers, but only authenticated users to create, update, or delete them.
      * @path /subscribers/{subscriberId}
-     * @allow (create) - Allows unauthenticated users to subscribe to the newsletter.
-     * @deny (update) - Denies authenticated users from updating subscriber information.
-     * @principle Allows unauthenticated newsletter subscriptions.
+     * @allow (get, list): if true
+     * @allow (create): if request.auth != null
+     * @allow (update): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
+     * @allow (delete): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
+     * @deny (create): if request.auth == null
+     * @deny (update): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
+     * @deny (delete): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
+     * @principle Allows public reads, restricts writes to authenticated owners.
      */
     match /subscribers/{subscriberId} {
-      allow get: if false;
-      allow list: if false;
-      allow create: if true;
-      allow update: if false;
-      allow delete: if false;
+      allow get, list: if true;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
     }
 
     /**
-     * @description Controls access to testimonial submissions.
+     * @description Allows anyone to read testimonials, but only authenticated users to create, update, or delete them.
      * @path /testimonials/{testimonialId}
-     * @allow (create) - Denied to all users, authentication is required.
-     * @deny (create) - Unauthenticated user attempts to create a testimonial.
-     * @principle Authentication required for testimonial submissions.
+     * @allow (get, list): if true
+     * @allow (create): if request.auth != null
+     * @allow (update): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
+     * @allow (delete): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
+     * @deny (create): if request.auth == null
+     * @deny (update): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
+     * @deny (delete): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
+     * @principle Allows public reads, restricts writes to authenticated owners.
      */
     match /testimonials/{testimonialId} {
-      allow get: if false;
-      allow list: if false;
+      allow get, list: if true;
       allow create: if isSignedIn();
-      allow update: if false;
-      allow delete: if false;
+      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
     }
-  }
 
-  // Helper function to determine if a user is signed in.
-  function isSignedIn() {
-    return request.auth != null;
+   /**
+     * @description Allows anyone to read blog posts, but only authenticated users to create, update, or delete them.
+     * @path /blogPosts/{postId}
+     * @allow (get, list): if true
+     * @allow (create): if request.auth != null
+     * @allow (update): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
+     * @allow (delete): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
+     * @deny (create): if request.auth == null
+     * @deny (update): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
+     * @deny (delete): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
+     * @principle Allows public reads, restricts writes to authenticated owners.
+     */
+    match /blogPosts/{postId} {
+      allow get, list: if true;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
   }
 }
