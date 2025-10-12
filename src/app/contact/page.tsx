@@ -199,7 +199,9 @@ export default function ContactPage() {
                   <CardTitle>Our Location</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">Adress no 58 Mare str Roodepoort opposite Fast Sell Motors Roodepoort 1724</p>
+                  <p className="text-muted-foreground">58 Mare Street, Roodepoort</p>
+                  <p className="text-muted-foreground">Opposite Fast Sell Motors</p>
+                  <p className="text-muted-foreground">Roodepoort, 1724</p>
                 </CardContent>
               </Card>
             </div>
