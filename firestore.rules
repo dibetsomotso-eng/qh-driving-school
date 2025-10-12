@@ -1,125 +1,105 @@
 /**
- * @fileoverview Firestore Security Rules for Prototyping.
- *
- * Core Philosophy:
- * This ruleset prioritizes rapid prototyping by focusing on authorization and deferring data validation. It uses a public-read, owner-write model for most collections, allowing flexible data shapes for faster iteration.
- *
- * Data Structure:
- * The Firestore database contains several top-level collections: bookings, contact submissions, subscribers, testimonials and blog posts. Each collection stores data related to its specific purpose.
- *
- * Key Security Decisions:
- * - Public Read Access: All collections are publicly readable to facilitate easy data display.
- * - Owner-Only Writes: Write access (create, update, delete) is restricted to authenticated users, based on the presence of an 'ownerId' field within the document that must match the authenticated user's UID.
- * - Missing Owner Field: If a schema lacks a clearly defined ownerId, writes are disabled with a placeholder comment to highlight the problem.
- * - No User Listing: Listing users is disallowed.
- *
- * Denormalization for Authorization:
- *  To avoid `get()` calls in rules, the owner is identified by an `ownerId` field in each document. This field must match the authenticated user's `uid` for write operations.
- *
- * Structural Segregation:
- *  The application uses top-level collections for both private and public data. The public data is readable by all, while write access is restricted to the owner.
+ * @description This ruleset enforces a role-based access control model for managing blog posts, testimonials, bookings, contact submissions and subscribers.
+ * Only authenticated users with admin role can create, update, or delete blog posts and testimonials.
+ * Bookings, contact submissions, and subscribers are publicly writable but not readable by any user.
+ * @dataStructure
+ * - /bookings/{bookingId}: Stores booking submissions made through the website.
+ * - /contactSubmissions/{contactId}: Stores contact form submissions from the website.
+ * - /subscribers/{subscriberId}: Stores newsletter subscription data.
+ * - /testimonials/{testimonialId}: Stores testimonial submissions from students.
+ * - /blogPosts/{postId}: Stores the blog posts for the website.
+ * @keySecurityDecisions
+ * - Public write, no read access for Bookings, ContactSubmissions and Subscribers.
+ * - Only admins can manage blog posts and testimonials.
+ * - No listing of any collections is allowed to prevent data leakage.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Allows anyone to read bookings, but only authenticated users to create, update, or delete them.
+     * @description Allows anyone to create booking documents, but denies all read access.
      * @path /bookings/{bookingId}
-     * @allow (get, list): if true
-     * @allow (create): if request.auth != null
-     * @allow (update): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
-     * @allow (delete): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
-     * @deny (create): if request.auth == null
-     * @deny (update): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
-     * @deny (delete): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
-     * @principle Allows public reads, restricts writes to authenticated owners.
+     * @allow (create) Any unauthenticated user can create a booking.
+     * @deny (get, list, update, delete) No one can read, update, or delete a booking.
+     * @principle Public write, no read access.
      */
     match /bookings/{bookingId} {
-      allow get, list: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
-      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
+      allow get: if false;
+      allow list: if false;
+      allow create: if true;
+      allow update: if false;
+      allow delete: if false;
     }
 
     /**
-     * @description Allows anyone to read contact submissions, but only authenticated users to create, update, or delete them.
+     * @description Allows anyone to create contact submission documents, but denies all read access.
      * @path /contactSubmissions/{contactId}
-     * @allow (get, list): if true
-     * @allow (create): if request.auth != null
-     * @allow (update): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
-     * @allow (delete): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
-     * @deny (create): if request.auth == null
-     * @deny (update): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
-     * @deny (delete): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
-     * @principle Allows public reads, restricts writes to authenticated owners.
+     * @allow (create) Any unauthenticated user can create a contact submission.
+     * @deny (get, list, update, delete) No one can read, update, or delete a contact submission.
+     * @principle Public write, no read access.
      */
     match /contactSubmissions/{contactId} {
-      allow get, list: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
-      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
+      allow get: if false;
+      allow list: if false;
+      allow create: if true;
+      allow update: if false;
+      allow delete: if false;
     }
 
     /**
-     * @description Allows anyone to read subscribers, but only authenticated users to create, update, or delete them.
+     * @description Allows anyone to create subscriber documents, but denies all read access.
      * @path /subscribers/{subscriberId}
-     * @allow (get, list): if true
-     * @allow (create): if request.auth != null
-     * @allow (update): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
-     * @allow (delete): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
-     * @deny (create): if request.auth == null
-     * @deny (update): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
-     * @deny (delete): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
-     * @principle Allows public reads, restricts writes to authenticated owners.
+     * @allow (create) Any unauthenticated user can create a subscriber.
+     * @deny (get, list, update, delete) No one can read, update, or delete a subscriber.
+     * @principle Public write, no read access.
      */
     match /subscribers/{subscriberId} {
-      allow get, list: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
-      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
+      allow get: if false;
+      allow list: if false;
+      allow create: if true;
+      allow update: if false;
+      allow delete: if false;
     }
 
     /**
-     * @description Allows anyone to read testimonials, but only authenticated users to create, update, or delete them.
+     * @description Allows only authenticated admins to manage testimonial documents.
      * @path /testimonials/{testimonialId}
-     * @allow (get, list): if true
-     * @allow (create): if request.auth != null
-     * @allow (update): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
-     * @allow (delete): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
-     * @deny (create): if request.auth == null
-     * @deny (update): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
-     * @deny (delete): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
-     * @principle Allows public reads, restricts writes to authenticated owners.
+     * @allow (create, update, delete) Only authenticated admins can manage testimonials.
+     * @deny (get, list) No one can read or list testimonials.
+     * @deny (create, update, delete) Non-admin users cannot manage testimonials.
+     * @principle Role-based access control.
      */
     match /testimonials/{testimonialId} {
-      allow get, list: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
-      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
+      allow get: if false;
+      allow list: if false;
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
     }
 
-   /**
-     * @description Allows anyone to read blog posts, but only authenticated users to create, update, or delete them.
+    /**
+     * @description Allows only authenticated admins to manage blog post documents.
      * @path /blogPosts/{postId}
-     * @allow (get, list): if true
-     * @allow (create): if request.auth != null
-     * @allow (update): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
-     * @allow (delete): if request.auth != null && resource.data.ownerId == request.auth.uid && resource != null
-     * @deny (create): if request.auth == null
-     * @deny (update): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
-     * @deny (delete): if request.auth == null || resource.data.ownerId != request.auth.uid || resource == null
-     * @principle Allows public reads, restricts writes to authenticated owners.
+     * @allow (create, update, delete) Only authenticated admins can manage blog posts.
+     * @deny (get, list) No one can read or list blog posts.
+     * @deny (create, update, delete) Non-admin users cannot manage blog posts.
+     * @principle Role-based access control.
      */
     match /blogPosts/{postId} {
-      allow get, list: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
-      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid && resource != null;
+      allow get: if false;
+      allow list: if false;
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
     }
 
     function isSignedIn() {
       return request.auth != null;
+    }
+
+    function isAdmin() {
+        return isSignedIn() && request.auth.token.admin == true;
     }
   }
 }
