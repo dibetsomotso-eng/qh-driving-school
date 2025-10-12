@@ -29,44 +29,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const pathname = usePathname();
-  const [isVerifying, setIsVerifying] = useState(true);
 
-  useEffect(() => {
-    // Wait until the authentication status is resolved
-    if (isUserLoading) {
-      return;
-    }
-
-    const isAdmin = user?.email === 'admin@example.com';
-    const isLoginPage = pathname === '/admin/login';
-
-    // If user is an admin...
-    if (isAdmin) {
-      // ...and they are on the login page, redirect them to the dashboard.
-      if (isLoginPage) {
-        router.replace('/admin');
-        // We don't set isVerifying to false here because a redirect is in progress.
-        // The next render will handle the new route.
-        return;
-      }
-    }
-    // If user is NOT an admin...
-    else {
-      // ...and they are on any page other than login, redirect them to login.
-      if (!isLoginPage) {
-        router.replace('/admin/login');
-        // A redirect is in progress.
-        return;
-      }
-    }
-
-    // If we've reached this point, no redirect is needed, so we can stop verifying.
-    setIsVerifying(false);
-
-  }, [user, isUserLoading, pathname, router]);
-
-  // While checking auth status or waiting for an initial redirect to occur, show a loader.
-  if (isVerifying) {
+  // While firebase is checking for the user, show a loader
+  if (isUserLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -77,8 +42,18 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const isAdmin = user?.email === 'admin@example.com';
   const isLoginPage = pathname === '/admin/login';
 
-  // Render the protected admin dashboard layout
-  if (isAdmin && !isLoginPage) {
+  // If user is logged in as admin
+  if (isAdmin) {
+    // and they are on the login page, redirect them to the dashboard
+    if (isLoginPage) {
+      router.replace('/admin');
+      return ( // Return loader while redirecting
+        <div className="flex h-screen items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      );
+    }
+    // otherwise, they are an admin on an admin page, show the admin layout
     return (
       <div className="min-h-screen bg-background">
         <AdminHeader />
@@ -87,6 +62,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  // Render the login page for non-admins, or for admins who are being redirected.
+  // If user is not an admin
+  // and they are not on the login page, redirect them to login
+  if (!isLoginPage) {
+    router.replace('/admin/login');
+    return ( // Return loader while redirecting
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  // otherwise, they are a non-admin on the login page, just show the login page content
   return <>{children}</>;
 }
