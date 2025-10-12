@@ -105,6 +105,11 @@ export function Footer() {
                   Book a Lesson
                 </Link>
               </li>
+              <li>
+                <Link href="/admin" className="text-sm hover:text-primary transition-colors text-accent-foreground/80">
+                  Admin
+                </Link>
+              </li>
             </ul>
           </div>
 
