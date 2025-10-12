@@ -34,7 +34,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const { user, isUserLoading } = useUser();
   const pathname = usePathname();
 
-  // Show a loader while Firebase is still determining the user's auth state.
+  // The middleware now handles redirection, so this component's logic can be much simpler.
+  // We just need to decide whether to render the UI, primarily the header.
+
+  // While checking user auth, show a full-screen loader.
   if (isUserLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -43,9 +46,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  // Determine if the header should be shown.
-  // The middleware handles redirection, so we only need to decide whether to render the UI.
+  // An admin is a user with the specific admin email.
   const isAdmin = user?.email === 'admin@example.com';
+  
+  // Don't show the header on the login page or if the user is not an admin.
   const showHeader = isAdmin && pathname !== '/admin/login';
   
   return (

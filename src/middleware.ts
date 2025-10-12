@@ -2,30 +2,30 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// This function can be marked `async` if using `await` inside
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const hasAuthCookie = request.cookies.has('firebase-auth-decoded'); // A simple check for any auth cookie
+  // This is a simplified check. In a real app, you might verify a JWT.
+  // For this context, we check for the presence of a cookie that Firebase sets.
+  const hasAuthCookie = request.cookies.has('firebase-auth-decoded'); 
 
   const isAdminRoute = pathname.startsWith('/admin');
   const isLoginPage = pathname === '/admin/login';
 
-  // If user is trying to access admin routes but has no auth cookie,
-  // and is not already on the login page, redirect to login.
+  // If trying to access a protected admin route without being authenticated, redirect to login.
   if (isAdminRoute && !isLoginPage && !hasAuthCookie) {
     return NextResponse.redirect(new URL('/admin/login', request.url))
   }
 
-  // If user is logged in and tries to access the login page,
-  // redirect them to the admin dashboard.
+  // If authenticated user tries to access the login page, redirect to the admin dashboard.
   if (isLoginPage && hasAuthCookie) {
     return NextResponse.redirect(new URL('/admin', request.url))
   }
 
+  // Allow the request to proceed if none of the above conditions are met.
   return NextResponse.next()
 }
 
-// See "Matching Paths" below to learn more
+// Config to specify that the middleware should run on all admin routes.
 export const config = {
-  matcher: '/admin/:path*',
+  matcher: ['/admin/:path*'],
 }
