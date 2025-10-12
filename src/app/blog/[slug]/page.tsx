@@ -14,6 +14,7 @@ import { type BlogPost, blogPosts as fallbackPosts } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function BlogPostPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
   const firestore = useFirestore();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,10 +24,10 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     if (!firestore) return null;
     return query(
       collection(firestore, 'blogPosts'),
-      where('slug', '==', params.slug),
+      where('slug', '==', slug),
       limit(1)
     );
-  }, [firestore, params.slug]);
+  }, [firestore, slug]);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -50,7 +51,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
       }
       
       // Fallback to local data if Firestore fetch fails or returns empty
-      const fallbackPost = fallbackPosts.find(p => p.slug === params.slug);
+      const fallbackPost = fallbackPosts.find(p => p.slug === slug);
       if (fallbackPost) {
         setPost(fallbackPost);
       } else {
@@ -62,7 +63,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 
     fetchPost();
 
-  }, [postQuery, params.slug]);
+  }, [postQuery, slug]);
 
   if (isLoading) {
     return (
