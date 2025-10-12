@@ -5,9 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
+import { collection } from "firebase/firestore";
 
 import { cn } from "@/lib/utils";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
@@ -29,6 +30,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useFirebase } from "@/firebase";
+import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 
 const bookingFormSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters."),
@@ -44,18 +47,36 @@ const bookingFormSchema = z.object({
 type BookingFormValues = z.infer<typeof bookingFormSchema>;
 
 export default function BookingPage() {
+  const { firestore } = useFirebase();
+  const { toast } = useToast();
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
   });
 
   function onSubmit(data: BookingFormValues) {
-    // In a real application, this would call a server action to save to Firestore.
-    console.log(data);
+    const bookingData = {
+      ...data,
+      preferredDate: format(data.preferredDate, "PPP"),
+      bookingDate: new Date().toISOString(),
+    };
+    
+    if (firestore) {
+      const bookingsCol = collection(firestore, "bookings");
+      addDocumentNonBlocking(bookingsCol, bookingData);
+    }
+    
     toast({
       title: "Booking Request Received!",
       description: `We've received your request for a lesson on ${format(data.preferredDate, "PPP")} at ${data.preferredTime}. We will contact you shortly to confirm.`,
     });
-    form.reset();
+    form.reset({
+      fullName: '',
+      phone: '',
+      email: '',
+      licenseType: '',
+      preferredDate: undefined,
+      preferredTime: ''
+    });
   }
 
   return (
@@ -126,7 +147,7 @@ export default function BookingPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>What are you booking for?</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value} >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a service or license" />
@@ -193,7 +214,7 @@ export default function BookingPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Preferred Time Slot</FormLabel>
-                           <Select onValueChange={field.onChange} defaultValue={field.value}>
+                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select a time" />

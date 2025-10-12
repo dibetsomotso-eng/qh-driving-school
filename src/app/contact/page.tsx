@@ -4,8 +4,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Mail, Phone } from "lucide-react";
+import { collection } from "firebase/firestore";
 
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,6 +27,8 @@ import {
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Icons } from "@/components/icons";
+import { useFirebase } from "@/firebase";
+import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 
 const contactFormSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters."),
@@ -38,6 +41,8 @@ const contactFormSchema = z.object({
 type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 export default function ContactPage() {
+  const { firestore } = useFirebase();
+  const { toast } = useToast();
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
@@ -50,7 +55,14 @@ export default function ContactPage() {
   });
 
   function onSubmit(data: ContactFormValues) {
-    console.log(data);
+    if (firestore) {
+      const contactSubmissionsCol = collection(firestore, "contactSubmissions");
+      addDocumentNonBlocking(contactSubmissionsCol, {
+        ...data,
+        submissionDate: new Date().toISOString(),
+      });
+    }
+    
     toast({
       title: "Message Sent!",
       description: "Thanks for reaching out. We'll get back to you shortly.",
@@ -128,7 +140,7 @@ export default function ContactPage() {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>License Type Interested In</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
                                     <SelectValue placeholder="Select a license type" />

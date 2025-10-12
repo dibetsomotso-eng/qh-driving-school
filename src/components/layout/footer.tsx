@@ -4,13 +4,17 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { toast } from "@/hooks/use-toast";
+import { collection } from "firebase/firestore";
 
+import { useToast } from "@/hooks/use-toast";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { navLinks } from "@/lib/data";
+import { useFirebase } from "@/firebase";
+import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+
 
 const newsletterSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -19,6 +23,8 @@ const newsletterSchema = z.object({
 type NewsletterFormValues = z.infer<typeof newsletterSchema>;
 
 export function Footer() {
+  const { firestore } = useFirebase();
+  const { toast } = useToast();
   const form = useForm<NewsletterFormValues>({
     resolver: zodResolver(newsletterSchema),
     defaultValues: {
@@ -27,8 +33,13 @@ export function Footer() {
   });
 
   function onSubmit(data: NewsletterFormValues) {
-    // Here you would typically send the data to your backend/CRM
-    console.log(data);
+    if (firestore) {
+      const subscribersCol = collection(firestore, "subscribers");
+      addDocumentNonBlocking(subscribersCol, {
+        ...data,
+        subscriptionDate: new Date().toISOString(),
+      });
+    }
     toast({
       title: "Subscribed!",
       description: "Thanks for joining our newsletter.",
