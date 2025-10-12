@@ -9,7 +9,7 @@ import ReactMarkdown from 'react-markdown';
 import { useMemoFirebase } from '@/firebase/provider';
 import { useFirestore } from '@/firebase';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { type BlogPost, blogPosts as fallbackPosts } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 
