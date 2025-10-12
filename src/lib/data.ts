@@ -143,6 +143,6 @@ export const galleryItems = [
     { id: "gallery-4", description: "Another happy student with their license." },
     { id: "gallery-5", description: "A QH branded motor bike." },
     { id: "gallery-6", description: "Student receiving a certificate of completion." },
-    { id: "gallery-7", description: "A group of students posing for a photo." },
-    { id: "gallery-8", description: "A view from inside the car during a lesson." },
+    { id: "gallery-7", description: "Student receiving a certificate of completion." },
+    { id: "gallery-8", description: "Student receiving a certificate of completion." },
 ];
