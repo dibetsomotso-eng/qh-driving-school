@@ -62,8 +62,8 @@
     },
     {
       "id": "service-card-issuing",
-      "description": "A new, freshly printed driver's license card.",
-      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Our%20Services%2FBooking%20of%20PrDP.jpg?alt=media",
+      "description": "Assistance in the final step: collecting your new license card.",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Our%20Services%2FCard%20Issuing.webp?alt=media",
       "imageHint": "new license"
     },
     {
@@ -135,7 +135,7 @@
     {
       "id": "gallery-8",
       "description": "A view from inside the car during a lesson.",
-      "imageUrl": "https://images.unsplash.com/photo-1621639532859-8b26570b96fc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjYXIlMjBpbnRlcmlvcnxlbnwwfHx8fDE3NTk2ODM3NzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1621639532859-8b26570b96fc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjYXIlMjBpbnRlcmlvcnxlbnwwfHx8fDE3NTk2ODM3NzJ8MA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "car interior"
     },
     {
