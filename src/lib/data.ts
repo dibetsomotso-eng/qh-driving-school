@@ -109,31 +109,96 @@ export const testimonials = [
   },
 ];
 
-export const blogPosts = [
+export interface BlogPost {
+  id?: string;
+  title: string;
+  slug: string;
+  publishedAt: string;
+  imageUrl: string;
+  imageHint: string;
+  excerpt: string;
+  content: string; // Markdown content
+}
+
+export const blogPosts: BlogPost[] = [
   {
-    id: 1,
     title: "5 Tips for Mastering Parallel Parking",
     slug: "5-tips-for-mastering-parallel-parking",
-    date: "2024-07-15",
-    imageId: "blog-2",
+    publishedAt: "2024-07-15T10:00:00Z",
+    imageUrl: "https://images.unsplash.com/photo-1648573688136-de51ced7aa0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwYXJhbGxlbCUyMHBhcmtpbmcnZXx8MHx8fHwxNzU5Nzc1NTM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    imageHint: "parallel parking",
     excerpt: "Parallel parking can be intimidating, but it doesn't have to be. With our step-by-step guide, you'll be slotting into tight spaces like a pro in no time...",
+    content: `
+Parallel parking is a driving skill that many find daunting, but with the right technique, it becomes second nature. Here are five tips to help you master it.
+
+### 1. Pick the Right Spot
+Choose a parking space that is at least one and a half times the length of your car. This gives you enough room to maneuver without stress.
+
+### 2. The Initial Position is Key
+Pull up alongside the car you'll be parking behind, aligning your rear bumpers. You should be about 2-3 feet away from the other car.
+
+### 3. Start Reversing Straight
+Turn your steering wheel all the way to the left (or right, depending on the side of the road). Reverse slowly until your car is at a 45-degree angle to the curb. A good reference point is when you can see the entire front of the car behind you in your driver's side mirror.
+
+### 4. Straighten and Continue
+Now, straighten your steering wheel and continue to reverse straight back. Keep going until your front bumper has cleared the rear bumper of the car in front of you.
+
+### 5. Final Turn into the Spot
+Turn your steering wheel all the way in the opposite direction (towards the curb). This will swing the front of your car into the space. Keep reversing slowly until you are parallel with the curb. You may need to pull forward slightly to center your car in the space.
+
+Practice makes perfect! Find an empty parking lot and use cones to practice these steps. You'll be a parallel parking expert in no time.`
   },
   {
-    id: 2,
     title: "Understanding South African Road Signs",
     slug: "understanding-south-african-road-signs",
-    date: "2024-07-01",
-    imageId: "blog-3",
+    publishedAt: "2024-07-01T10:00:00Z",
+    imageUrl: "https://images.unsplash.com/photo-1572670014853-1d3a3f22b40f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyb2FkJTIwc2lnbnN8ZW58MHx8fHwxNzU5NjcyNDUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    imageHint: "road signs",
     excerpt: "Regulatory, warning, or guidance? We break down the different categories of road signs in South Africa to help you prepare for your learner's test and drive safer.",
+    content: `
+Road signs are the silent language of the road. Understanding them is crucial for passing your learner's test and for safe driving. In South Africa, signs are divided into several categories.
+
+### Regulatory Signs
+These are usually circular with a red border and tell you what you *must* or *must not* do. The most common is the Stop sign (an octagon) and the Yield sign (an inverted triangle). Others include speed limits and no-entry signs.
+
+### Warning Signs
+These are typically triangular with a red border and warn you of potential hazards ahead, such as sharp curves, slippery roads, or animal crossings. They are designed to give you time to adjust your driving.
+
+### Information and Guidance Signs
+These are rectangular and provide information. Blue signs often indicate directions or facilities, while green signs are used for guidance on freeways.
+
+Mastering these signs is a key part of your learner's license preparation. Our classes include dedicated modules to ensure you know them all by heart.`
   },
   {
-    id: 3,
     title: "What to Expect on Your Driver's Test Day",
     slug: "what-to-expect-on-your-drivers-test-day",
-    date: "2024-06-20",
-    imageId: "blog-1",
+    publishedAt: "2024-06-20T10:00:00Z",
+    imageUrl: "https://images.unsplash.com/photo-1629015346993-2c1aa5d94cb3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkcml2aW5nJTIwdmlld3xlbnwwfHx8fDE3NTk3NzU1MzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    imageHint: "driving view",
     excerpt: "The big day is approaching! Here’s a checklist of what to bring, what the examiner will be looking for, and how to keep your nerves in check to ensure success.",
-  },
+    content: `
+The practical driving test is the final step to freedom. Knowing what to expect can significantly calm your nerves.
+
+### Before the Test
+*   **Pre-Trip Inspection:** You will be asked to perform an exterior and interior pre-trip inspection of the vehicle. You must know how to check lights, wipers, tyres, and fluids.
+*   **Documentation:** Ensure you have your ID book/card, learner's license, and booking confirmation.
+
+### The Yard Test
+This is the first part of the test. You'll be required to perform several maneuvers:
+*   Parallel parking
+*   Alley docking (reversing into a bay)
+*   Three-point turn
+You must complete these without hitting any poles and within the designated number of attempts.
+
+### The Road Test
+After successfully completing the yard test, you'll go out onto public roads with the examiner. They will be assessing your ability to:
+*   Obey traffic signs and signals.
+*   Perform observation checks (mirrors, blind spots).
+*   Maintain a safe following distance.
+*   Handle the vehicle smoothly and confidently.
+
+Remember to stay calm, listen carefully to the examiner's instructions, and drive safely. Good luck!`
+  }
 ];
 
 export const galleryItems = [

@@ -141,6 +141,51 @@
         "email",
         "subscriptionDate"
       ]
+    },
+    "BlogPost": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Blog Post",
+      "type": "object",
+      "description": "Represents a blog post in the application.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The title of the blog post."
+        },
+        "slug": {
+          "type": "string",
+          "description": "A URL-friendly version of the title."
+        },
+        "content": {
+          "type": "string",
+          "description": "The full content of the blog post, likely in Markdown format."
+        },
+        "excerpt": {
+          "type": "string",
+          "description": "A short summary of the blog post."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL for the blog post's cover image."
+        },
+        "imageHint": {
+          "type": "string",
+          "description": "Hint for AI image generation."
+        },
+        "publishedAt": {
+          "type": "string",
+          "description": "The date and time the post was published.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "title",
+        "slug",
+        "content",
+        "excerpt",
+        "imageUrl",
+        "publishedAt"
+      ]
     }
   },
   "auth": {
@@ -173,6 +218,12 @@
         "$ref": "#/entities/Testimonial"
       },
       "description": "Stores testimonial submissions from students."
+    },
+    "/blogPosts/{postId}": {
+      "schema": {
+        "$ref": "#/entities/BlogPost"
+      },
+      "description": "Stores the blog posts for the website."
     }
   }
 }

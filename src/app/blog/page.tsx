@@ -1,11 +1,29 @@
+"use client";
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { blogPosts } from '@/lib/data';
 import { Button } from '@/components/ui/button';
+import { useCollection } from '@/firebase';
+import { collection, query, orderBy, where } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
+import type { BlogPost } from '@/lib/data';
+import { useMemoFirebase } from '@/firebase/provider';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function BlogPage() {
+  const firestore = useFirestore();
+
+  const postsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(
+      collection(firestore, 'blogPosts'),
+      where('publishedAt', '<=', new Date().toISOString()),
+      orderBy('publishedAt', 'desc')
+    );
+  }, [firestore]);
+
+  const { data: posts, isLoading } = useCollection<BlogPost>(postsQuery);
+
   return (
     <>
       <section className="bg-card py-16 md:py-24">
@@ -20,31 +38,45 @@ export default function BlogPage() {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.map((post) => {
-              const postImage = PlaceHolderImages.find((img) => img.id === post.imageId);
+            {isLoading && Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i} className="flex flex-col overflow-hidden shadow-lg">
+                <Skeleton className="w-full h-48" />
+                <CardContent className="p-6 flex-grow">
+                  <Skeleton className="h-4 w-1/4 mb-2" />
+                  <Skeleton className="h-6 w-full mb-2" />
+                  <Skeleton className="h-4 w-full" />
+                   <Skeleton className="h-4 w-full mt-1" />
+                </CardContent>
+                <CardFooter className="p-6 pt-0">
+                  <Skeleton className="h-10 w-24" />
+                </CardFooter>
+              </Card>
+            ))}
+            {posts?.map((post) => {
               return (
                 <Card key={post.id} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <CardHeader className="p-0">
-                    {postImage && (
+                    {post.imageUrl && (
                       <Image
-                        src={postImage.imageUrl}
-                        alt={postImage.description}
+                        src={post.imageUrl}
+                        alt={post.title}
                         width={400}
                         height={250}
                         className="w-full h-48 object-cover"
-                        data-ai-hint={postImage.imageHint}
+                        data-ai-hint={post.imageHint}
                       />
                     )}
                   </CardHeader>
                   <CardContent className="p-6 flex-grow">
-                    <p className="text-sm text-muted-foreground mb-2">{post.date}</p>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {new Date(post.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </p>
                     <CardTitle className="text-xl font-bold mb-2">{post.title}</CardTitle>
                     <CardDescription>{post.excerpt}</CardDescription>
                   </CardContent>
                   <CardFooter className="p-6 pt-0">
                     <Button variant="outline" asChild>
-                      {/* In a full app, this would link to /blog/{post.slug} */}
-                      <Link href="#">Read More</Link>
+                      <Link href={`/blog/${post.slug}`}>Read More</Link>
                     </Button>
                   </CardFooter>
                 </Card>
