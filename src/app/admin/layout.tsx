@@ -40,9 +40,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         router.replace('/admin');
       }
     }
-  }, [user, isUserLoading, router, pathname]);
+  }, [user, isUserLoading]); // router and pathname removed from dependencies
 
-  if (isUserLoading) {
+  if (isUserLoading && pathname !== '/admin/login') {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -56,8 +56,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // Only show header and main layout if user is an admin and not on the login page
   const isAdmin = user?.email === 'admin@example.com';
-  if (!isAdmin) {
-    return null; // or a loading/redirecting state
+  if (!user || !isAdmin) {
+    // This will show the loading spinner briefly while redirecting non-admins
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
   }
 
   return (
