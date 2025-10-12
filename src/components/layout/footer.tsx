@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { collection } from "firebase/firestore";
+import { collection, getFirestore } from "firebase/firestore";
 
 import { useToast } from "@/hooks/use-toast";
 import { Icons } from "@/components/icons";
@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { navLinks } from "@/lib/data";
-import { useFirestore } from "@/firebase";
+import { useFirebase } from "@/firebase";
 import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 
 
@@ -23,7 +23,7 @@ const newsletterSchema = z.object({
 type NewsletterFormValues = z.infer<typeof newsletterSchema>;
 
 export function Footer() {
-  const firestore = useFirestore();
+  const { firestore } = useFirebase();
   const { toast } = useToast();
   const form = useForm<NewsletterFormValues>({
     resolver: zodResolver(newsletterSchema),
@@ -125,7 +125,7 @@ export function Footer() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" variant="primary" className="bg-primary text-primary-foreground">
+                <Button type="submit" variant="default" className="bg-accent-foreground text-accent">
                   Subscribe
                 </Button>
               </form>
