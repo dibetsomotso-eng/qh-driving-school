@@ -33,7 +33,7 @@
     {
       "id": "service-renewals",
       "description": "Close up of a driver's license card.",
-      "imageUrl": "https://images.unsplash.com/photo-1585314062528-0c3742fa6102?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bGljZW5zZSUyMGNhcmR8ZW58MHx8fHwxNzU5Nzc1NTM1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Our%20Services%2FDriver's%20License%20Renewals.jpeg?alt=media",
       "imageHint": "license card"
     },
     {
@@ -123,7 +123,7 @@
     {
       "id": "gallery-6",
       "description": "Student receiving a certificate of completion.",
-      "imageUrl": "https://images.unsplash.com/photo-1623068285726-21b0fcabe7f8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxkcml2aW5nJTIwY2VydGlmaWNhdGV8ZW58MHx8fHwxNzU5Nzc1NTM0fDA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1623068285726-21b0fcabe7f8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxkcml2aW5nJTIwY2VydGlmaWNhdGV8ZW58MHx8fHwxNzU5Nzc1NTM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "driving certificate"
     },
     {
