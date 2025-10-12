@@ -30,7 +30,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useFirebase } from "@/firebase";
+import { useFirestore } from "@/firebase";
 import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 
 const bookingFormSchema = z.object({
@@ -47,7 +47,7 @@ const bookingFormSchema = z.object({
 type BookingFormValues = z.infer<typeof bookingFormSchema>;
 
 export default function BookingPage() {
-  const { firestore } = useFirebase();
+  const firestore = useFirestore();
   const { toast } = useToast();
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),

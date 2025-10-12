@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Icons } from "@/components/icons";
-import { useFirebase } from "@/firebase";
+import { useFirestore } from "@/firebase";
 import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 
 const contactFormSchema = z.object({
@@ -41,7 +41,7 @@ const contactFormSchema = z.object({
 type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 export default function ContactPage() {
-  const { firestore } = useFirebase();
+  const firestore = useFirestore();
   const { toast } = useToast();
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),

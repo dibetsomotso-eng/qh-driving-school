@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { navLinks } from "@/lib/data";
-import { useFirebase } from "@/firebase";
+import { useFirestore } from "@/firebase";
 import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 
 
@@ -23,7 +23,7 @@ const newsletterSchema = z.object({
 type NewsletterFormValues = z.infer<typeof newsletterSchema>;
 
 export function Footer() {
-  const { firestore } = useFirebase();
+  const firestore = useFirestore();
   const { toast } = useToast();
   const form = useForm<NewsletterFormValues>({
     resolver: zodResolver(newsletterSchema),
