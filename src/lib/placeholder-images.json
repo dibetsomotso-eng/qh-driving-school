@@ -45,7 +45,7 @@
     {
       "id": "service-code-c1-ec",
       "description": "A medium-sized truck driving on a highway.",
-      "imageUrl": "https://images.unsplash.com/photo-1485575301924-6891ef935dcd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx0cnVjayUyMGRyaXZpbmd8ZW58MHx8fHwxNzU5Nzc1NTM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1485575301924-6891ef935dcd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx0cnVjayUyMGRyaXZpbmd8ZW58MHx8fHwxNzU5Nzc1NTM0fDA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "truck driving"
     },
     {
@@ -57,7 +57,7 @@
     {
       "id": "service-learners-drivers",
       "description": "An instructor pointing at a road sign to a student.",
-      "imageUrl": "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkcml2aW5nJTIwbGVzc29ufGVufDB8fHx8MTc1OTcwMzExMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkcml2aW5nJTIwbGVzc29ufGVufDB8fHx8MTc1OTcwMzExMXww&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "driving lesson"
     },
     {
@@ -69,25 +69,25 @@
     {
       "id": "service-guaranteed-pass",
       "description": "A student smiling and giving a thumbs up after passing their test.",
-      "imageUrl": "https://images.unsplash.com/photo-1614492898637-435e0f87cef8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwYXNzaW5nJTIwdGVzdHxlbnwwfHx8fDE3NTk3NzU1MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1614492898637-435e0f87cef8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwYXNzaW5nJTIwdGVzdHxlbnwwfHx8fDE3NTk3NzU1MzV8MA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "passing test"
     },
     {
       "id": "blog-1",
       "description": "A car's dashboard with a focus on the steering wheel and road ahead.",
-      "imageUrl": "https://images.unsplash.com/photo-1629015346993-2c1aa5d94cb3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkcml2aW5nJTIwdmlld3xlbnwwfHx8fDE3NTk3NzU1MzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1629015346993-2c1aa5d94cb3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkcml2aW5nJTIwdmlld3xlbnwwfHx8fDE3NTk3NzU1MzR8MA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "driving view"
     },
     {
       "id": "blog-2",
       "description": "A parallel parking maneuver shown from a top-down angle.",
-      "imageUrl": "https://images.unsplash.com/photo-1648573688136-de51ced7aa0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkcml2aW5nJTIwbWFuZXV2ZXJ8ZW58MHx8fHwxNzU5Nzc1NTM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1648573688136-de51ced7aa0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwYXJhbGxlbCUyMHBhcmtpbmcnZXx8MHx8fHwxNzU5Nzc1NTM0fDA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "parallel parking"
     },
     {
       "id": "blog-3",
       "description": "A road with multiple traffic signs.",
-      "imageUrl": "https://images.unsplash.com/photo-1572670014853-1d3a3f22b40f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyb2FkJTIwc2lnbnN8ZW58MHx8fHwxNzU5NjcyNDUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1572670014853-1d3a3f22b40f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyb2FkJTIwc2lnbnN8ZW58MHx8fHwxNzU5NjcyNDUzfDA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "road signs"
     },
     {
@@ -123,7 +123,7 @@
     {
       "id": "gallery-6",
       "description": "Student receiving a certificate of completion.",
-      "imageUrl": "https://images.unsplash.com/photo-1623068285726-21b0fcabe7f8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxkcml2aW5nJTIwY2VydGlmaWNhdGV8ZW58MHx8fHwxNzU5Nzc1NTM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Gallery%2FHappy%20Student%209.jpg?alt=media",
       "imageHint": "driving certificate"
     },
     {
