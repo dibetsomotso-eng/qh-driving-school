@@ -138,7 +138,7 @@ export const blogPosts = [
 
 export const galleryItems = [
     { id: "gallery-1", description: "Happy student holding a driver's license." },
-    { id: "gallery-2", description: "Instructor giving a thumbs up to a student." },
+    { id: "gallery-2", description: "Another happy student holding their license." },
     { id: "gallery-3", description: "QH Driving School branded car." },
     { id: "gallery-4", description: "Student practicing a three-point turn." },
     { id: "gallery-5", description: "Close-up of hands on a steering wheel." },
