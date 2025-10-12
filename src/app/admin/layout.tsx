@@ -1,11 +1,10 @@
 'use client';
 
-import { useUser } from '@/firebase';
+import { useUser, useAuth } from '@/firebase';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/firebase';
 
 function AdminHeader() {
   const auth = useAuth();
@@ -32,22 +31,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
 
   useEffect(() => {
+    // Don't do anything while auth state is loading
     if (isUserLoading) {
-      return; // Wait for authentication to resolve
+      return;
     }
 
     const isAdmin = user?.email === 'admin@example.com';
     const isLoginPage = pathname === '/admin/login';
 
+    // If user is not admin and not on the login page, redirect to login
     if (!isAdmin && !isLoginPage) {
       router.replace('/admin/login');
     }
-
+    
+    // If user is admin and on the login page, redirect to dashboard
     if (isAdmin && isLoginPage) {
       router.replace('/admin');
     }
+
   }, [user, isUserLoading, pathname, router]);
 
+  // While auth is loading, show a full-screen spinner. This is the highest priority.
   if (isUserLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -59,22 +63,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isAdmin = user?.email === 'admin@example.com';
   const isLoginPage = pathname === '/admin/login';
 
-  if (!isAdmin && !isLoginPage) {
-    // While redirecting, show a loader
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  if (isLoginPage) {
-    // Render login page without the admin header
-    return <>{children}</>;
-  }
-  
-  if (isAdmin) {
-    // Render the full admin layout
+  // If the user is an admin and not on the login page, show the dashboard.
+  if (isAdmin && !isLoginPage) {
     return (
       <div className="min-h-screen bg-background">
         <AdminHeader />
@@ -83,7 +73,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  // This should not be reached if logic is correct, but as a fallback:
+  // If the user is not an admin and is trying to access the login page, show the login page.
+  if (!isAdmin && isLoginPage) {
+    return <>{children}</>;
+  }
+  
+  // As a fallback for any other cases (like a non-admin on an admin page during the brief redirect period), show a loader.
   return (
     <div className="flex h-screen items-center justify-center">
       <Loader2 className="h-8 w-8 animate-spin" />
