@@ -2,7 +2,7 @@
 
 import { useUser, useAuth } from '@/firebase';
 import { useRouter, usePathname } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -30,6 +30,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
 
+  // State to manage redirection, preventing premature navigation
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [redirectPath, setRedirectPath] = useState('');
+
   useEffect(() => {
     // Don't do anything while auth state is loading
     if (isUserLoading) {
@@ -39,20 +43,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const isAdmin = user?.email === 'admin@example.com';
     const isLoginPage = pathname === '/admin/login';
 
-    // If user is not admin and not on the login page, redirect to login
-    if (!isAdmin && !isLoginPage) {
-      router.replace('/admin/login');
+    // Scenario 1: User is an admin
+    if (isAdmin) {
+      // If they are on the login page, redirect them to the dashboard.
+      if (isLoginPage) {
+        setRedirectPath('/admin');
+        setShouldRedirect(true);
+      }
     }
-    
-    // If user is admin and on the login page, redirect to dashboard
-    if (isAdmin && isLoginPage) {
-      router.replace('/admin');
+    // Scenario 2: User is NOT an admin
+    else {
+      // If they are on any page other than login, redirect them to login.
+      if (!isLoginPage) {
+        setRedirectPath('/admin/login');
+        setShouldRedirect(true);
+      }
     }
+  }, [user, isUserLoading, pathname]);
 
-  }, [user, isUserLoading, pathname, router]);
+  useEffect(() => {
+    if (shouldRedirect && redirectPath) {
+      router.replace(redirectPath);
+    }
+  }, [shouldRedirect, redirectPath, router]);
 
-  // While auth is loading, show a full-screen spinner. This is the highest priority.
-  if (isUserLoading) {
+
+  // While auth is loading OR a redirect is pending, show a full-screen spinner.
+  if (isUserLoading || shouldRedirect) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -62,7 +79,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const isAdmin = user?.email === 'admin@example.com';
   const isLoginPage = pathname === '/admin/login';
-
+  
   // If the user is an admin and not on the login page, show the dashboard.
   if (isAdmin && !isLoginPage) {
     return (
@@ -73,12 +90,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  // If the user is not an admin and is trying to access the login page, show the login page.
+  // If the user is not an admin and is on the login page, show the login page.
   if (!isAdmin && isLoginPage) {
     return <>{children}</>;
   }
-  
-  // As a fallback for any other cases (like a non-admin on an admin page during the brief redirect period), show a loader.
+
+  // Fallback loader for any brief transitional states.
   return (
     <div className="flex h-screen items-center justify-center">
       <Loader2 className="h-8 w-8 animate-spin" />
