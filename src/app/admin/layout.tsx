@@ -2,11 +2,10 @@
 'use client';
 
 import { useUser } from '@/firebase';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/firebase';
-import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
 function AdminHeader() {
@@ -29,12 +28,11 @@ function AdminHeader() {
   );
 }
 
-
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const { user, isUserLoading } = useUser();
   const pathname = usePathname();
 
-  // The middleware now handles redirection, so this component's logic can be much simpler.
+  // The middleware now handles redirection, so this component's logic is much simpler.
   // We just need to decide whether to render the UI, primarily the header.
 
   // While checking user auth, show a full-screen loader.
@@ -50,6 +48,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const isAdmin = user?.email === 'admin@example.com';
   
   // Don't show the header on the login page or if the user is not an admin.
+  // The middleware prevents non-admins from seeing protected pages.
   const showHeader = isAdmin && pathname !== '/admin/login';
   
   return (
