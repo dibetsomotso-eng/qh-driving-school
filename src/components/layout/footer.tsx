@@ -5,7 +5,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { collection, addDoc } from "firebase/firestore";
+import { collection } from "firebase/firestore";
 
 import { useToast } from "@/hooks/use-toast";
 import { Icons } from "@/components/icons";
