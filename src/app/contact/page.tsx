@@ -58,9 +58,6 @@ export default function ContactPage() {
     form.reset();
   }
   
-  const mapEmbedUrl = "https://www.google.com/maps/embed/v1/place?key=&q=59%20Mare%20Street%2C%20Roodepoort%2C%201727%2C%20South%20Africa";
-
-
   return (
     <>
       <section className="bg-card py-16 md:py-24">
@@ -208,19 +205,6 @@ export default function ContactPage() {
             </div>
           </div>
         </div>
-      </section>
-
-      <section className="w-full h-[400px]">
-        <iframe
-          src={mapEmbedUrl}
-          width="100%"
-          height="100%"
-          style={{ border: 0 }}
-          allowFullScreen={false}
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          title="Location of QH Driving School"
-        ></iframe>
       </section>
     </>
   );
