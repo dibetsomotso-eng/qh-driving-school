@@ -1,0 +1,75 @@
+/**
+ * @fileoverview Firestore Security Rules for QH Driving School.
+ *
+ * Core Philosophy:
+ * This ruleset allows unauthenticated writes to the 'bookings', 'testimonials', and 'subscribers' collections to facilitate easy form submissions.
+ * Read access (get, list) is public.
+ *
+ * Data Structure:
+ * - /bookings/{bookingId}: Stores booking submissions.
+ * - /testimonials/{testimonialId}: Stores testimonial submissions.
+ * - /subscribers/{subscriberId}: Stores newsletter subscriptions.
+ *
+ * Key Security Decisions:
+ * - Unauthenticated writes are allowed for all collections.  This is REQUIRED for the described use case and acknowledged as a potential risk. Rate limiting and other application-level security measures MUST be implemented to mitigate abuse.
+ * - Read operations are public (get, list).
+ *
+ * Denormalization for Authorization:
+ * Not applicable, as no authorization is required.
+ *
+ * Structural Segregation:
+ * Data is segregated into separate collections based on entity type (bookings, testimonials, subscribers).
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Allows public reads and writes to the 'bookings' collection.
+     * @path /bookings/{bookingId}
+     * @allow (create) Unauthenticated user creates a new booking.
+     * @allow (get, list) Any user (authenticated or not) reads booking data.
+     * @deny (update) No updates allowed.
+     * @deny (delete) No deletes allowed.
+     * @principle Allows unauthenticated submissions for bookings.
+     */
+    match /bookings/{bookingId} {
+      allow get, list: if true;
+      allow create: if true;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    /**
+     * @description Allows public reads and writes to the 'testimonials' collection.
+     * @path /testimonials/{testimonialId}
+     * @allow (create) Unauthenticated user creates a new testimonial.
+     * @allow (get, list) Any user (authenticated or not) reads testimonial data.
+     * @deny (update) No updates allowed.
+     * @deny (delete) No deletes allowed.
+     * @principle Allows unauthenticated submissions for testimonials.
+     */
+    match /testimonials/{testimonialId} {
+      allow get, list: if true;
+      allow create: if true;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    /**
+     * @description Allows public reads and writes to the 'subscribers' collection.
+     * @path /subscribers/{subscriberId}
+     * @allow (create) Unauthenticated user creates a new subscriber.
+     * @allow (get, list) Any user (authenticated or not) reads subscriber data.
+     * @deny (update) No updates allowed.
+     * @deny (delete) No deletes allowed.
+     * @principle Allows unauthenticated submissions for newsletter subscriptions.
+     */
+    match /subscribers/{subscriberId} {
+      allow get, list: if true;
+      allow create: if true;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}

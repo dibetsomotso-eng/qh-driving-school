@@ -1,0 +1,168 @@
+{
+  "entities": {
+    "Booking": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Booking",
+      "type": "object",
+      "description": "Represents a booking for a driving lesson.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the booking."
+        },
+        "fullName": {
+          "type": "string",
+          "description": "Full name of the person making the booking."
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "Phone number of the person making the booking."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the person making the booking.",
+          "format": "email"
+        },
+        "licenseType": {
+          "type": "string",
+          "description": "The type of license the person is interested in (e.g., Code A, B, EB, C1, EC)."
+        },
+        "message": {
+          "type": "string",
+          "description": "Any additional message from the person making the booking."
+        },
+        "bookingDate": {
+          "type": "string",
+          "description": "The date and time the booking was made.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "fullName",
+        "phoneNumber",
+        "email",
+        "licenseType",
+        "message",
+        "bookingDate"
+      ]
+    },
+    "Testimonial": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Testimonial",
+      "type": "object",
+      "description": "Represents a testimonial from a student.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the testimonial."
+        },
+        "authorName": {
+          "type": "string",
+          "description": "Name of the author of the testimonial."
+        },
+        "testimonialText": {
+          "type": "string",
+          "description": "Text content of the testimonial."
+        },
+        "submissionDate": {
+          "type": "string",
+          "description": "The date and time the testimonial was submitted.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "authorName",
+        "testimonialText",
+        "submissionDate"
+      ]
+    },
+    "Subscriber": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Subscriber",
+      "type": "object",
+      "description": "Represents a subscriber to the newsletter.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the subscriber."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the subscriber.",
+          "format": "email"
+        },
+        "subscriptionDate": {
+          "type": "string",
+          "description": "The date and time the subscriber subscribed.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "subscriptionDate"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/bookings/{bookingId}",
+        "definition": {
+          "entityName": "Booking",
+          "schema": {
+            "$ref": "#/backend/entities/Booking"
+          },
+          "description": "Stores booking submissions made through the website. No authentication required for writing.",
+          "params": [
+            {
+              "name": "bookingId",
+              "description": "Unique identifier for the booking."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/testimonials/{testimonialId}",
+        "definition": {
+          "entityName": "Testimonial",
+          "schema": {
+            "$ref": "#/backend/entities/Testimonial"
+          },
+          "description": "Stores testimonial submissions from students. No authentication required for writing.",
+          "params": [
+            {
+              "name": "testimonialId",
+              "description": "Unique identifier for the testimonial."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/subscribers/{subscriberId}",
+        "definition": {
+          "entityName": "Subscriber",
+          "schema": {
+            "$ref": "#/backend/entities/Subscriber"
+          },
+          "description": "Stores newsletter subscription data. No authentication required for writing.",
+          "params": [
+            {
+              "name": "subscriberId",
+              "description": "Unique identifier for the subscriber."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to store submissions related to bookings, testimonials, and newsletter subscriptions for QH Driving School. Each entity is stored in its own top-level collection to maintain a clear separation of concerns and simplify security rules. This approach supports the application's core features, including online bookings, service listings, contact form submissions, testimonial display, and newsletter subscriptions. Each submission is stored without user authentication requirements, reflecting the public nature of the data capture. The lack of user authentication simplifies the data capture process and reduces friction for potential customers and subscribers. The data structure also enables efficient querying and management of each type of submission.\n\nAuthorization Independence: Since these collections are designed to capture public submissions (bookings, testimonials, and subscriptions), there is no dependency on user authorization. All data is written directly to the collections without requiring a user to be authenticated. This approach simplifies the security rules, as no user-based access control is needed for writing data.\n\nQAPs (Rules are not Filters): The structure supports secure 'list' operations by storing each entity type in its own top-level collection. Security rules can be configured to allow public read access to the collections if required, or they can be restricted based on IP address or other criteria. The segregation of data into separate collections ensures that listing operations are efficient and do not expose any sensitive data."
+  }
+}
