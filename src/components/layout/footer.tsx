@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { navLinks } from "@/lib/data";
-import { useFirebase } from "@/firebase";
+import { useFirebase, useFirestore } from "@/firebase";
 import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 
 
@@ -24,7 +24,7 @@ const newsletterSchema = z.object({
 type NewsletterFormValues = z.infer<typeof newsletterSchema>;
 
 export function Footer() {
-  const { firestore } = useFirebase();
+  const firestore = useFirestore();
   const { toast } = useToast();
   const [isClient, setIsClient] = React.useState(false);
 
@@ -114,31 +114,40 @@ export function Footer() {
             <p className="mt-4 text-sm text-accent-foreground/80">
               Get driving tips and special offers directly in your inbox.
             </p>
-            {isClient && (
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4 flex gap-2">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem className="flex-grow">
-                        <FormControl>
-                          <Input
-                            placeholder="Your email"
-                            {...field}
-                            className="bg-background/20 border-border/50 text-accent-foreground placeholder:text-accent-foreground/60"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" variant="default" className="bg-accent-foreground text-accent">
-                    Subscribe
-                  </Button>
-                </form>
-              </Form>
-            )}
+            <div className="mt-4">
+              {isClient ? (
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-2">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem className="flex-grow">
+                          <FormControl>
+                            <Input
+                              placeholder="Your email"
+                              {...field}
+                              className="bg-background/20 border-border/50 text-accent-foreground placeholder:text-accent-foreground/60"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" variant="default" className="bg-accent-foreground text-accent">
+                      Subscribe
+                    </Button>
+                  </form>
+                </Form>
+              ) : (
+                <div className="flex gap-2">
+                   <Input placeholder="Your email" disabled className="bg-background/20 border-border/50" />
+                   <Button type="submit" variant="default" className="bg-accent-foreground text-accent" disabled>
+                      Subscribe
+                    </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         <div className="mt-8 border-t border-border/20 pt-6 text-center text-sm text-accent-foreground/60">
