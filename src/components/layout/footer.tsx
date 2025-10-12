@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -25,6 +26,12 @@ type NewsletterFormValues = z.infer<typeof newsletterSchema>;
 export function Footer() {
   const { firestore } = useFirebase();
   const { toast } = useToast();
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const form = useForm<NewsletterFormValues>({
     resolver: zodResolver(newsletterSchema),
     defaultValues: {
@@ -107,29 +114,31 @@ export function Footer() {
             <p className="mt-4 text-sm text-accent-foreground/80">
               Get driving tips and special offers directly in your inbox.
             </p>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4 flex gap-2">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem className="flex-grow">
-                      <FormControl>
-                        <Input
-                          placeholder="Your email"
-                          {...field}
-                          className="bg-background/20 border-border/50 text-accent-foreground placeholder:text-accent-foreground/60"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" variant="default" className="bg-accent-foreground text-accent">
-                  Subscribe
-                </Button>
-              </form>
-            </Form>
+            {isClient && (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4 flex gap-2">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem className="flex-grow">
+                        <FormControl>
+                          <Input
+                            placeholder="Your email"
+                            {...field}
+                            className="bg-background/20 border-border/50 text-accent-foreground placeholder:text-accent-foreground/60"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" variant="default" className="bg-accent-foreground text-accent">
+                    Subscribe
+                  </Button>
+                </form>
+              </Form>
+            )}
           </div>
         </div>
         <div className="mt-8 border-t border-border/20 pt-6 text-center text-sm text-accent-foreground/60">
