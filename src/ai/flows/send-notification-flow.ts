@@ -6,7 +6,9 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { sendEmail, type EmailRequest } from '../services/email';
+import * as dotenv from 'dotenv';
 
+dotenv.config();
 
 const notificationInputSchema = z.object({
   type: z.enum(['booking', 'contact', 'newsletter']),
@@ -27,13 +29,22 @@ const sendNotificationFlow = ai.defineFlow(
     outputSchema: z.object({ success: z.boolean(), message: z.string() }),
   },
   async (input) => {
-    const fromEmail = process.env.FROM_EMAIL || 'henrymteb@gmail.com';
-    const adminEmails = (process.env.ADMIN_EMAILS || 'henrymteb@gmail.com,dibetsomotso@gmail.com').split(',').filter(Boolean);
-    const businessName = process.env.BUSINESS_NAME || 'QH Driving School';
+    const fromEmail = process.env.FROM_EMAIL;
+    const adminEmailsConfig = process.env.ADMIN_EMAILS;
+    const businessName = process.env.BUSINESS_NAME;
+
+    if (!fromEmail || !adminEmailsConfig || !businessName) {
+        const message = "Email environment variables (FROM_EMAIL, ADMIN_EMAILS, BUSINESS_NAME) are not configured in .env file.";
+        console.error(`❌ ${message}`);
+        return { success: false, message };
+    }
+    
+    const adminEmails = adminEmailsConfig.split(',').filter(Boolean);
 
     if (adminEmails.length === 0) {
-      console.warn('No admin emails configured. Skipping email notification.');
-      return { success: false, message: "Admin email not configured." };
+      const message = "No admin emails configured in .env file.";
+      console.warn(`⚠️ ${message}`);
+      return { success: false, message };
     }
 
     let adminEmail: EmailRequest | null = null;
@@ -216,9 +227,8 @@ const sendNotificationFlow = ai.defineFlow(
 
         const failed = results.filter(r => r.status === 'rejected');
         if (failed.length > 0) {
-            console.error('Some emails failed to send:', failed);
-            // We still count it as a partial success if at least one email went out
-            const message = failed.length === emailPromises.length ? "All emails failed to send." : "Some notification emails failed to send.";
+            console.error('Some emails failed to send:', failed.map(f => (f as PromiseRejectedResult).reason));
+            const message = failed.length === emailPromises.length ? "All notification emails failed to send." : "Some notification emails failed to send.";
             return { success: false, message };
         }
 
@@ -231,5 +241,3 @@ const sendNotificationFlow = ai.defineFlow(
     }
   }
 );
-
-    

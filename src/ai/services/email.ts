@@ -1,6 +1,9 @@
 'use server';
 
 import sgMail from '@sendgrid/mail';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 export interface EmailRequest {
     to: string | string[];
@@ -14,7 +17,7 @@ export interface EmailRequest {
 export async function sendEmail(request: EmailRequest) {
     const sendgridKey = process.env.SENDGRID_API_KEY;
     if (!sendgridKey) {
-        console.warn('⚠️ SendGrid API key not configured. Skipping email.');
+        console.warn('⚠️ SendGrid API key not configured. Check your .env file.');
         throw new Error('SendGrid API key is not configured.');
     }
     sgMail.setApiKey(sendgridKey);
