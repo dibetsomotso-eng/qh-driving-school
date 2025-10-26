@@ -68,16 +68,15 @@ export default function BookingPage() {
     };
     
     try {
-      if (firestore) {
-        await addDoc(collection(firestore, "bookings"), bookingData);
-        toast({
-          title: "Booking Request Received!",
-          description: `We've received your request for a lesson on ${format(data.preferredDate, "PPP")} at ${data.preferredTime}. We will contact you shortly to confirm.`,
-        });
-        form.reset();
-      } else {
+      if (!firestore) {
         throw new Error("Firestore is not available.");
       }
+      await addDoc(collection(firestore, "bookings"), bookingData);
+      toast({
+        title: "Booking Request Received!",
+        description: `We've received your request for a lesson on ${format(data.preferredDate, "PPP")} at ${data.preferredTime}. We will contact you shortly to confirm.`,
+      });
+      form.reset();
     } catch (error) {
       console.error("Error submitting booking:", error);
       toast({
