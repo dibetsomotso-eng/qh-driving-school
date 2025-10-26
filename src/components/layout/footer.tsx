@@ -39,20 +39,24 @@ export function Footer() {
   });
 
   async function onSubmit(data: NewsletterFormValues) {
+    if (!firestore) {
+      toast({
+        variant: "destructive",
+        title: "Subscription Error",
+        description: "There was a problem with your subscription. Please try again.",
+      });
+      return;
+    }
     try {
-      if (firestore) {
-        await addDoc(collection(firestore, "subscribers"), {
-          ...data,
-          subscriptionDate: new Date().toISOString(),
-        });
-        toast({
-          title: "Subscribed!",
-          description: "Thanks for joining our newsletter.",
-        });
-        form.reset();
-      } else {
-        throw new Error("Firestore is not available.");
-      }
+      await addDoc(collection(firestore, "subscribers"), {
+        ...data,
+        subscriptionDate: new Date().toISOString(),
+      });
+      toast({
+        title: "Subscribed!",
+        description: "Thanks for joining our newsletter.",
+      });
+      form.reset();
     } catch (error) {
        console.error("Error submitting newsletter:", error);
        toast({

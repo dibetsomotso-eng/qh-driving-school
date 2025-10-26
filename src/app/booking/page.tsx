@@ -49,6 +49,7 @@ type BookingFormValues = z.infer<typeof bookingFormSchema>;
 export default function BookingPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
+  
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
     defaultValues: {
@@ -61,6 +62,15 @@ export default function BookingPage() {
   });
 
   async function onSubmit(data: BookingFormValues) {
+    if (!firestore) {
+      toast({
+        variant: "destructive",
+        title: "Submission Error",
+        description: "Firestore is not available. Please try again later.",
+      });
+      return;
+    }
+    
     const bookingData = {
       ...data,
       preferredDate: format(data.preferredDate, "PPP"),
@@ -68,9 +78,6 @@ export default function BookingPage() {
     };
     
     try {
-      if (!firestore) {
-        throw new Error("Firestore is not available.");
-      }
       await addDoc(collection(firestore, "bookings"), bookingData);
       toast({
         title: "Booking Request Received!",

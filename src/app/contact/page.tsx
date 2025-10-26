@@ -55,13 +55,20 @@ export default function ContactPage() {
   });
 
   async function onSubmit(data: ContactFormValues) {
+    if (!firestore) {
+      toast({
+        variant: "destructive",
+        title: "Submission Error",
+        description: "Firestore is not available. Please try again later.",
+      });
+      return;
+    }
+
     try {
-      if (firestore) {
-        await addDoc(collection(firestore, "contactSubmissions"), {
-          ...data,
-          submissionDate: new Date().toISOString(),
-        });
-      }
+      await addDoc(collection(firestore, "contactSubmissions"), {
+        ...data,
+        submissionDate: new Date().toISOString(),
+      });
       
       toast({
         title: "Message Sent!",
