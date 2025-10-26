@@ -98,10 +98,7 @@ export default function BookingPage() {
           data: { ...bookingData, id: docRef.id }
         }).then(notificationResult => {
             if (notificationResult.success) {
-                toast({
-                    title: "Email Sent",
-                    description: "Confirmation emails have been sent.",
-                });
+                console.log("Confirmation emails sent successfully.");
             } else {
                  toast({
                     variant: "destructive",
