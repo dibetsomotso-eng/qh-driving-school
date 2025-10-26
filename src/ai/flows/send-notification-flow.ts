@@ -6,44 +6,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { sendEmail } from '@/ai/services/email';
-
-// Define schemas for different notification types
-const BookingDataSchema = z.object({
-  fullName: z.string(),
-  phone: z.string(),
-  email: z.string(),
-  licenseType: z.string(),
-  preferredDate: z.string(),
-  preferredTime: z.string(),
-  bookingDate: z.string(),
-  bookingId: z.string(),
-});
-
-const ContactDataSchema = z.object({
-  fullName: z.string(),
-  phone: z.string(),
-  email: z.string(),
-  message: z.string(),
-  submissionDate: z.string(),
-});
-
-const SubscriberDataSchema = z.object({
-  email: z.string(),
-  subscriptionDate: z.string(),
-});
-
-// Input schema for the main flow
-export const SendNotificationInputSchema = z.object({
-  notificationType: z.enum(['booking', 'contact', 'newsletter']),
-  data: z.union([BookingDataSchema, ContactDataSchema, SubscriberDataSchema]),
-});
-export type SendNotificationInput = z.infer<typeof SendNotificationInputSchema>;
-
-// Output schema for the main flow
-export const SendNotificationOutputSchema = z.object({
-  success: z.boolean(),
-});
-export type SendNotificationOutput = z.infer<typeof SendNotificationOutputSchema>;
+import { SendNotificationInputSchema, SendNotificationOutputSchema, type SendNotificationInput, BookingDataSchema, ContactDataSchema, SubscriberDataSchema } from '@/ai/flows/schemas';
 
 
 /**
@@ -51,7 +14,7 @@ export type SendNotificationOutput = z.infer<typeof SendNotificationOutputSchema
  * @param {SendNotificationInput} input - The notification type and associated data.
  * @returns {Promise<SendNotificationOutput>} - A promise that resolves to the output of the flow.
  */
-export async function sendNotification(input: SendNotificationInput): Promise<SendNotificationOutput> {
+export async function sendNotification(input: SendNotificationInput): Promise<z.infer<typeof SendNotificationOutputSchema>> {
   return sendNotificationFlow(input);
 }
 
@@ -66,6 +29,12 @@ const sendNotificationFlow = ai.defineFlow(
     const adminEmails = (process.env.ADMIN_EMAILS || 'dibetsomotso@gmail.com').split(',');
     const fromEmail = process.env.FROM_EMAIL || 'dibetsomotso@gmail.com';
     const businessName = process.env.BUSINESS_NAME || 'QH Driving School';
+    const sendgridKey = process.env.SENDGRID_API_KEY;
+
+    if (!sendgridKey) {
+        console.error('❌ SendGrid API key is not configured. Cannot send emails.');
+        return { success: false };
+    }
 
     try {
         let adminEmailPromise: Promise<any> | null = null;
@@ -74,17 +43,17 @@ const sendNotificationFlow = ai.defineFlow(
         if (notificationType === 'booking' && 'fullName' in data) {
             const booking = data as z.infer<typeof BookingDataSchema>;
             const { adminEmail, customerEmail } = getBookingEmailTemplates(booking, adminEmails, fromEmail, businessName);
-            adminEmailPromise = sendEmail(adminEmail);
-            customerEmailPromise = sendEmail(customerEmail);
+            adminEmailPromise = sendEmail(adminEmail, sendgridKey);
+            customerEmailPromise = sendEmail(customerEmail, sendgridKey);
         } else if (notificationType === 'contact' && 'fullName' in data) {
             const contact = data as z.infer<typeof ContactDataSchema>;
             const adminEmail = getContactEmailTemplate(contact, adminEmails, fromEmail);
-            adminEmailPromise = sendEmail(adminEmail);
+            adminEmailPromise = sendEmail(adminEmail, sendgridKey);
         } else if (notificationType === 'newsletter' && 'email' in data) {
             const subscriber = data as z.infer<typeof SubscriberDataSchema>;
             const { adminEmail, customerEmail } = getNewsletterEmailTemplates(subscriber, adminEmails, fromEmail, businessName);
-            adminEmailPromise = sendEmail(adminEmail);
-            customerEmailPromise = sendEmail(customerEmail);
+            adminEmailPromise = sendEmail(adminEmail, sendgridKey);
+            customerEmailPromise = sendEmail(customerEmail, sendgridKey);
         }
 
         const promises = [adminEmailPromise, customerEmailPromise].filter(p => p !== null) as Promise<any>[];

@@ -9,6 +9,7 @@ import * as z from "zod";
 import { collection, addDoc } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
 import { sendNotification } from '@/ai/flows/send-notification-flow';
+import { type SendNotificationInput } from '@/ai/flows/schemas';
 
 import { useToast } from "@/hooks/use-toast";
 import { Icons } from "@/components/icons";
@@ -66,11 +67,13 @@ export function Footer() {
           });
           form.reset();
 
-          // Send notification email
-          sendNotification({
+          const notificationData: SendNotificationInput = {
             notificationType: 'newsletter',
             data: subscriberData
-          }).then(response => {
+          };
+
+          // Send notification email
+          sendNotification(notificationData).then(response => {
             if (!response.success) {
               console.error("Could not send newsletter confirmation email.");
             }

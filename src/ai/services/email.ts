@@ -16,13 +16,12 @@ interface EmailParams {
 /**
  * Sends an email using SendGrid.
  * @param {EmailParams} mailOptions - The options for the email.
+ * @param {string} sendgridKey - The SendGrid API key.
  * @returns {Promise<any>} - A promise that resolves with the SendGrid response.
  */
-export async function sendEmail(mailOptions: EmailParams) {
-  const sendgridKey = process.env.SENDGRID_API_KEY;
-
+export async function sendEmail(mailOptions: EmailParams, sendgridKey: string) {
   if (!sendgridKey) {
-    console.warn('⚠️ SendGrid API key not configured. Email will not be sent.');
+    console.warn('⚠️ SendGrid API key was not provided to sendEmail function. Email will not be sent.');
     // To avoid breaking the flow, we can return a resolved promise.
     return Promise.resolve({
       message: 'Email not sent due to missing API key.',
