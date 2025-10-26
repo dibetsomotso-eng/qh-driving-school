@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { navLinks } from "@/lib/data";
 import { useFirestore } from "@/firebase";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 const newsletterSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -37,37 +39,49 @@ export function Footer() {
     defaultValues,
   });
 
-  async function onSubmit(data: NewsletterFormValues) {
+  const onSubmit = (data: NewsletterFormValues) => {
     setIsSubmitting(true);
     if (!firestore) {
       toast({
         variant: "destructive",
         title: "Subscription Error",
-        description: "There was a problem with your subscription. Please try again.",
+        description: "Firestore is not available. Please try again.",
       });
       setIsSubmitting(false);
       return;
     }
-    try {
-      await addDoc(collection(firestore, "subscribers"), {
+    
+    const subscriberData = {
         ...data,
         subscriptionDate: new Date().toISOString(),
-      });
-      toast({
-        title: "Subscribed!",
-        description: "Thanks for joining our newsletter.",
-      });
-      form.reset();
-    } catch (error) {
-       console.error("Error submitting newsletter:", error);
-       toast({
-        variant: "destructive",
-        title: "Subscription Error",
-        description: "There was a problem with your subscription. Please try again.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    };
+
+    const subscribersColRef = collection(firestore, "subscribers");
+
+    addDoc(subscribersColRef, subscriberData)
+        .then(() => {
+            toast({
+              title: "Subscribed!",
+              description: "Thanks for joining our newsletter.",
+            });
+            form.reset();
+        })
+        .catch(async (error) => {
+            const permissionError = new FirestorePermissionError({
+                path: subscribersColRef.path,
+                operation: 'create',
+                requestResourceData: subscriberData,
+            });
+            errorEmitter.emit('permission-error', permissionError);
+            toast({
+              variant: "destructive",
+              title: "Subscription Error",
+              description: "There was a problem with your subscription. Please try again.",
+            });
+        })
+        .finally(() => {
+            setIsSubmitting(false);
+        });
   }
 
   return (

@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { collection, addDoc } from "firebase/firestore";
 import { useState } from "react";
 
@@ -32,7 +32,8 @@ import {
 } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFirestore } from "@/firebase";
-import { Loader2 } from "lucide-react";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 const bookingFormSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters."),
@@ -65,7 +66,7 @@ export default function BookingPage() {
     defaultValues,
   });
 
-  const onSubmit = async (data: BookingFormValues) => {
+  const onSubmit = (data: BookingFormValues) => {
     setIsSubmitting(true);
     if (!firestore) {
       toast({
@@ -82,25 +83,34 @@ export default function BookingPage() {
       preferredDate: format(data.preferredDate, "PPP"),
       bookingDate: new Date().toISOString(),
     };
+
+    const bookingsColRef = collection(firestore, "bookings");
     
-    try {
-      await addDoc(collection(firestore, "bookings"), bookingData);
-      toast({
-        title: "Booking Request Received!",
-        description: `We've received your request for a lesson on ${format(data.preferredDate, "PPP")} at ${data.preferredTime}. We will contact you shortly to confirm.`,
+    addDoc(bookingsColRef, bookingData)
+      .then(() => {
+          toast({
+            title: "Booking Request Received!",
+            description: `We've received your request for a lesson on ${bookingData.preferredDate} at ${data.preferredTime}. We will contact you shortly to confirm.`,
+          });
+          form.reset();
+      })
+      .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+              path: bookingsColRef.path,
+              operation: 'create',
+              requestResourceData: bookingData,
+          });
+          errorEmitter.emit('permission-error', permissionError);
+          toast({
+            variant: "destructive",
+            title: "Submission Error",
+            description: "There was a problem submitting your booking. Please try again later.",
+          });
+      })
+      .finally(() => {
+          setIsSubmitting(false);
       });
-      form.reset();
-    } catch (error) {
-      console.error("Error submitting booking:", error);
-      toast({
-        variant: "destructive",
-        title: "Submission Error",
-        description: "There was a problem submitting your booking. Please try again later.",
-      });
-    } finally {
-        setIsSubmitting(false);
-    }
-  }
+  };
 
   return (
     <>

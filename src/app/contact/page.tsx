@@ -30,6 +30,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Icons } from "@/components/icons";
 import { useFirestore } from "@/firebase";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
+
 
 const contactFormSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters."),
@@ -59,7 +62,7 @@ export default function ContactPage() {
     defaultValues,
   });
 
-  async function onSubmit(data: ContactFormValues) {
+  const onSubmit = (data: ContactFormValues) => {
     setIsSubmitting(true);
     if (!firestore) {
       toast({
@@ -71,28 +74,38 @@ export default function ContactPage() {
       return;
     }
 
-    try {
-      await addDoc(collection(firestore, "contactSubmissions"), {
+    const submissionData = {
         ...data,
         submissionDate: new Date().toISOString(),
+    };
+
+    const contactSubmissionsColRef = collection(firestore, "contactSubmissions");
+
+    addDoc(contactSubmissionsColRef, submissionData)
+      .then(() => {
+          toast({
+            title: "Message Sent!",
+            description: "Thanks for reaching out. We'll get back to you shortly.",
+          });
+          form.reset();
+      })
+      .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+              path: contactSubmissionsColRef.path,
+              operation: 'create',
+              requestResourceData: submissionData,
+          });
+          errorEmitter.emit('permission-error', permissionError);
+          toast({
+            variant: "destructive",
+            title: "Submission Error",
+            description: "There was a problem sending your message. Please try again later.",
+          });
+      })
+      .finally(() => {
+          setIsSubmitting(false);
       });
-      
-      toast({
-        title: "Message Sent!",
-        description: "Thanks for reaching out. We'll get back to you shortly.",
-      });
-      form.reset();
-    } catch (error) {
-      console.error("Error submitting contact form:", error);
-      toast({
-        variant: "destructive",
-        title: "Submission Error",
-        description: "There was a problem sending your message. Please try again later.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
+  };
   
   return (
     <>
