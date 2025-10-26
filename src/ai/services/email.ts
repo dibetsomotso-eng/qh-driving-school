@@ -14,11 +14,11 @@ export interface EmailRequest {
     replyTo?: string;
 }
 
-export async function sendEmail(request: EmailRequest) {
-    const sendgridKey = process.env.SENDGRID_API_KEY;
+export async function sendEmail(sendgridKey: string, request: EmailRequest) {
     if (!sendgridKey) {
-        console.warn('⚠️ SendGrid API key not configured. Check your .env file.');
-        throw new Error('SendGrid API key is not configured.');
+        const errorMessage = 'SendGrid API key is not provided to the sendEmail function.';
+        console.error(`❌ ${errorMessage}`);
+        throw new Error(errorMessage);
     }
     sgMail.setApiKey(sendgridKey);
 
@@ -28,6 +28,7 @@ export async function sendEmail(request: EmailRequest) {
         return { success: true };
     } catch (error) {
         console.error('❌ Error sending email:', JSON.stringify(error, null, 2));
-        throw new Error(`Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown SendGrid error';
+        throw new Error(`Failed to send email: ${errorMessage}`);
     }
 }

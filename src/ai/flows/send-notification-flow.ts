@@ -32,6 +32,13 @@ const sendNotificationFlow = ai.defineFlow(
     const fromEmail = process.env.FROM_EMAIL;
     const adminEmailsConfig = process.env.ADMIN_EMAILS;
     const businessName = process.env.BUSINESS_NAME;
+    const sendgridKey = process.env.SENDGRID_API_KEY;
+
+    if (!sendgridKey) {
+        const message = "SENDGRID_API_KEY is not configured in .env file.";
+        console.error(`❌ ${message}`);
+        return { success: false, message };
+    }
 
     if (!fromEmail || !adminEmailsConfig || !businessName) {
         const message = "Email environment variables (FROM_EMAIL, ADMIN_EMAILS, BUSINESS_NAME) are not configured in .env file.";
@@ -217,10 +224,10 @@ const sendNotificationFlow = ai.defineFlow(
 
         const emailPromises = [];
         if (adminEmail) {
-            emailPromises.push(sendEmail(adminEmail));
+            emailPromises.push(sendEmail(sendgridKey, adminEmail));
         }
         if (customerEmail) {
-            emailPromises.push(sendEmail(customerEmail));
+            emailPromises.push(sendEmail(sendgridKey, customerEmail));
         }
         
         const results = await Promise.allSettled(emailPromises);
