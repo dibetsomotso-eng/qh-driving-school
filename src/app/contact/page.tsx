@@ -7,8 +7,6 @@ import * as z from "zod";
 import { Mail, Phone, Loader2 } from "lucide-react";
 import { collection, addDoc } from "firebase/firestore";
 import { useState } from "react";
-import { sendNotification } from '@/ai/flows/send-notification-flow';
-import { type SendNotificationInput } from '@/ai/flows/schemas';
 
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -89,16 +87,22 @@ export default function ContactPage() {
             });
             form.reset();
 
-            const notificationData: SendNotificationInput = {
+            const notificationPayload = {
               notificationType: 'contact',
               data: submissionData
             };
             
             // Send notification email
-            sendNotification(notificationData).then(response => {
-              if (!response.success) {
-                console.error("Could not send contact notification email.");
-              }
+            fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(notificationPayload),
+            }).then(res => res.json()).then(response => {
+                if (!response.success) {
+                    console.error("API Error: Could not send contact notification email.");
+                }
+            }).catch(err => {
+                console.error("Fetch Error: Could not send contact notification email.", err);
             });
         })
         .catch((error) => {

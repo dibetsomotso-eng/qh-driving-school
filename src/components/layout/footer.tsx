@@ -8,8 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { collection, addDoc } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
-import { sendNotification } from '@/ai/flows/send-notification-flow';
-import { type SendNotificationInput } from '@/ai/flows/schemas';
 
 import { useToast } from "@/hooks/use-toast";
 import { Icons } from "@/components/icons";
@@ -67,16 +65,22 @@ export function Footer() {
           });
           form.reset();
 
-          const notificationData: SendNotificationInput = {
+          const notificationPayload = {
             notificationType: 'newsletter',
             data: subscriberData
           };
 
           // Send notification email
-          sendNotification(notificationData).then(response => {
+          fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(notificationPayload),
+          }).then(res => res.json()).then(response => {
             if (!response.success) {
-              console.error("Could not send newsletter confirmation email.");
+              console.error("API Error: Could not send newsletter confirmation email.");
             }
+          }).catch(err => {
+              console.error("Fetch Error: Could not send newsletter confirmation email.", err);
           });
       })
       .catch((error) => {
