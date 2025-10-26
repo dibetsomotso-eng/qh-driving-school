@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { collection, addDoc } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
+import { sendNotification } from '@/ai/flows/send-notification-flow';
 
 import { useToast } from "@/hooks/use-toast";
 import { Icons } from "@/components/icons";
@@ -64,6 +65,16 @@ export function Footer() {
             description: "Thanks for joining our newsletter.",
           });
           form.reset();
+
+          // Send notification email
+          sendNotification({
+            notificationType: 'newsletter',
+            data: subscriberData
+          }).then(response => {
+            if (!response.success) {
+              console.error("Could not send newsletter confirmation email.");
+            }
+          });
       })
       .catch((error) => {
           const permissionError = new FirestorePermissionError({

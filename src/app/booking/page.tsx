@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { collection, addDoc } from "firebase/firestore";
 import { useState } from "react";
+import { sendNotification } from '@/ai/flows/send-notification-flow';
 
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -90,6 +91,22 @@ export default function BookingPage() {
           description: "We've received your request and will contact you shortly.",
         });
         form.reset();
+
+        // Send notification email
+        sendNotification({
+          notificationType: 'booking',
+          data: { ...bookingData, bookingId: docRef.id }
+        }).then(response => {
+          if (!response.success) {
+            console.error("Could not send confirmation emails.");
+            // Optionally show a non-blocking toast
+            toast({
+              variant: "destructive",
+              title: "Email Error",
+              description: "There was a problem sending the confirmation email.",
+            });
+          }
+        });
       })
       .catch((error) => {
         const permissionError = new FirestorePermissionError({

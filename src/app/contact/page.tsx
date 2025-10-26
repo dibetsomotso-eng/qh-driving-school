@@ -7,6 +7,7 @@ import * as z from "zod";
 import { Mail, Phone, Loader2 } from "lucide-react";
 import { collection, addDoc } from "firebase/firestore";
 import { useState } from "react";
+import { sendNotification } from '@/ai/flows/send-notification-flow';
 
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -86,6 +87,16 @@ export default function ContactPage() {
               description: "Thanks for reaching out. We'll get back to you shortly.",
             });
             form.reset();
+
+            // Send notification email
+            sendNotification({
+              notificationType: 'contact',
+              data: submissionData
+            }).then(response => {
+              if (!response.success) {
+                console.error("Could not send contact notification email.");
+              }
+            });
         })
         .catch((error) => {
             const permissionError = new FirestorePermissionError({
