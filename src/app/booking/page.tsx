@@ -98,6 +98,7 @@ export default function BookingPage() {
           requestResourceData: bookingData,
         });
         errorEmitter.emit('permission-error', permissionError);
+        
         toast({
           variant: "destructive",
           title: "Submission Error",
@@ -248,7 +249,7 @@ export default function BookingPage() {
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select a time" />
-                              </Trigger>
+                              </SelectTrigger>
                             </FormControl>
                             <SelectContent>
                               <SelectItem value="morning">Morning (8am - 12pm)</SelectItem>
