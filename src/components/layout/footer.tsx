@@ -65,7 +65,6 @@ export function Footer() {
           form.reset();
       })
       .catch((error) => {
-          console.error("Newsletter subscription error:", error);
           const permissionError = new FirestorePermissionError({
             path: 'subscribers',
             operation: 'create',

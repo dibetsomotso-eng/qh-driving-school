@@ -88,7 +88,6 @@ export default function ContactPage() {
             form.reset();
         })
         .catch((error) => {
-            console.error("Contact submission error:", error);
             const permissionError = new FirestorePermissionError({
               path: 'contactSubmissions',
               operation: 'create',

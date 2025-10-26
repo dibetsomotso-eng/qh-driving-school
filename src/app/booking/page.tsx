@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -93,7 +92,6 @@ export default function BookingPage() {
         form.reset();
       })
       .catch((error) => {
-        console.error("Booking submission error:", error);
         const permissionError = new FirestorePermissionError({
           path: 'bookings',
           operation: 'create',
@@ -183,7 +181,7 @@ export default function BookingPage() {
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a service or license" />
-                            </Trigger>
+                            </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="learners">Learner's License Prep</SelectItem>
