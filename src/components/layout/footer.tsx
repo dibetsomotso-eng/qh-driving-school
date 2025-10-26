@@ -18,6 +18,8 @@ import { navLinks } from "@/lib/data";
 import { useFirestore } from "@/firebase";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
+import { sendNotification } from "@/ai/flows/send-notification-flow";
+
 
 const newsletterSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -57,12 +59,26 @@ export function Footer() {
     };
 
     addDoc(collection(firestore, "subscribers"), subscriberData)
-      .then(() => {
+      .then((docRef) => {
           toast({
             title: "Subscribed!",
             description: "Thanks for joining our newsletter.",
           });
           form.reset();
+
+          // Send notifications
+          sendNotification({
+              type: 'newsletter',
+              data: { ...subscriberData, id: docRef.id }
+          }).then(notificationResult => {
+              if (!notificationResult.success) {
+                  toast({
+                      variant: "destructive",
+                      title: "Email Error",
+                      description: "Could not send welcome email.",
+                  });
+              }
+          });
       })
       .catch((error) => {
           const permissionError = new FirestorePermissionError({

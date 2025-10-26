@@ -33,6 +33,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useFirestore } from "@/firebase";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
+import { sendNotification } from "@/ai/flows/send-notification-flow";
 
 const bookingFormSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters."),
@@ -84,12 +85,31 @@ export default function BookingPage() {
     };
 
     addDoc(collection(firestore, "bookings"), bookingData)
-      .then(() => {
+      .then((docRef) => {
         toast({
           title: "Booking Request Received!",
-          description: `We've received your request for a lesson on ${bookingData.preferredDate} at ${data.preferredTime}. We will contact you shortly to confirm.`,
+          description: "We've received your request and will contact you shortly.",
         });
         form.reset();
+
+        // Send notification email in the background
+        sendNotification({
+          type: 'booking',
+          data: { ...bookingData, id: docRef.id }
+        }).then(notificationResult => {
+            if (notificationResult.success) {
+                toast({
+                    title: "Email Sent",
+                    description: "Confirmation emails have been sent.",
+                });
+            } else {
+                 toast({
+                    variant: "destructive",
+                    title: "Email Error",
+                    description: "Could not send confirmation emails.",
+                });
+            }
+        });
       })
       .catch((error) => {
         const permissionError = new FirestorePermissionError({

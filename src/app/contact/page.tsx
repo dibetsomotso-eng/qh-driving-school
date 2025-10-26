@@ -32,6 +32,7 @@ import { Icons } from "@/components/icons";
 import { useFirestore } from "@/firebase";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
+import { sendNotification } from "@/ai/flows/send-notification-flow";
 
 
 const contactFormSchema = z.object({
@@ -80,12 +81,26 @@ export default function ContactPage() {
     };
 
     addDoc(collection(firestore, "contactSubmissions"), submissionData)
-        .then(() => {
+        .then((docRef) => {
             toast({
               title: "Message Sent!",
               description: "Thanks for reaching out. We'll get back to you shortly.",
             });
             form.reset();
+
+            // Send notification
+            sendNotification({
+              type: 'contact',
+              data: { ...submissionData, id: docRef.id }
+            }).then(notificationResult => {
+                if (!notificationResult.success) {
+                    toast({
+                        variant: "destructive",
+                        title: "Email Error",
+                        description: "Could not send notification email to admin.",
+                    });
+                }
+            });
         })
         .catch((error) => {
             const permissionError = new FirestorePermissionError({
