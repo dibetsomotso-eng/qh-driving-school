@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -5,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { collection } from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -51,9 +52,16 @@ export default function BookingPage() {
   const { toast } = useToast();
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
+    defaultValues: {
+      fullName: "",
+      phone: "",
+      email: "",
+      licenseType: "",
+      preferredTime: "",
+    },
   });
 
-  function onSubmit(data: BookingFormValues) {
+  async function onSubmit(data: BookingFormValues) {
     const bookingData = {
       ...data,
       preferredDate: format(data.preferredDate, "PPP"),
@@ -61,22 +69,14 @@ export default function BookingPage() {
     };
     
     if (firestore) {
-      const bookingsCol = collection(firestore, "bookings");
-      addDocumentNonBlocking(bookingsCol, bookingData);
+        addDocumentNonBlocking(collection(firestore, "bookings"), bookingData);
     }
     
     toast({
       title: "Booking Request Received!",
       description: `We've received your request for a lesson on ${format(data.preferredDate, "PPP")} at ${data.preferredTime}. We will contact you shortly to confirm.`,
     });
-    form.reset({
-      fullName: '',
-      phone: '',
-      email: '',
-      licenseType: '',
-      preferredDate: undefined,
-      preferredTime: ''
-    });
+    form.reset();
   }
 
   return (
@@ -218,7 +218,7 @@ export default function BookingPage() {
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select a time" />
-                              </SelectTrigger>
+                              </Trigger>
                             </FormControl>
                             <SelectContent>
                               <SelectItem value="morning">Morning (8am - 12pm)</SelectItem>
