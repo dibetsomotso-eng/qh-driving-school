@@ -7,6 +7,7 @@ import * as z from "zod";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { collection, addDoc } from "firebase/firestore";
+import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -24,7 +25,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFirestore } from "@/firebase";
+import { Loader2 } from "lucide-react";
 
 const bookingFormSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters."),
@@ -46,28 +47,33 @@ const bookingFormSchema = z.object({
 
 type BookingFormValues = z.infer<typeof bookingFormSchema>;
 
+const defaultValues: Partial<BookingFormValues> = {
+    fullName: "",
+    phone: "",
+    email: "",
+    licenseType: "",
+    preferredTime: "",
+};
+
 export default function BookingPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
-    defaultValues: {
-      fullName: "",
-      phone: "",
-      email: "",
-      licenseType: "",
-      preferredTime: "",
-    },
+    defaultValues,
   });
 
-  async function onSubmit(data: BookingFormValues) {
+  const onSubmit = async (data: BookingFormValues) => {
+    setIsSubmitting(true);
     if (!firestore) {
       toast({
         variant: "destructive",
         title: "Submission Error",
         description: "Firestore is not available. Please try again later.",
       });
+      setIsSubmitting(false);
       return;
     }
     
@@ -91,6 +97,8 @@ export default function BookingPage() {
         title: "Submission Error",
         description: "There was a problem submitting your booking. Please try again later.",
       });
+    } finally {
+        setIsSubmitting(false);
     }
   }
 
@@ -247,7 +255,10 @@ export default function BookingPage() {
                     />
                   </div>
                   
-                  <Button type="submit" size="lg" className="w-full">Request Booking</Button>
+                  <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Request Booking
+                  </Button>
                 </form>
               </Form>
             </CardContent>

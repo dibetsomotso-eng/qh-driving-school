@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { collection, addDoc } from "firebase/firestore";
+import { Loader2 } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
 import { Icons } from "@/components/icons";
@@ -22,29 +23,29 @@ const newsletterSchema = z.object({
 
 type NewsletterFormValues = z.infer<typeof newsletterSchema>;
 
+const defaultValues: Partial<NewsletterFormValues> = {
+    email: "",
+};
+
 export function Footer() {
   const firestore = useFirestore();
   const { toast } = useToast();
-  const [isClient, setIsClient] = React.useState(false);
-
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<NewsletterFormValues>({
     resolver: zodResolver(newsletterSchema),
-    defaultValues: {
-      email: "",
-    },
+    defaultValues,
   });
 
   async function onSubmit(data: NewsletterFormValues) {
+    setIsSubmitting(true);
     if (!firestore) {
       toast({
         variant: "destructive",
         title: "Subscription Error",
         description: "There was a problem with your subscription. Please try again.",
       });
+      setIsSubmitting(false);
       return;
     }
     try {
@@ -64,6 +65,8 @@ export function Footer() {
         title: "Subscription Error",
         description: "There was a problem with your subscription. Please try again.",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -133,38 +136,29 @@ export function Footer() {
               Get driving tips and special offers directly in your inbox.
             </p>
             <div className="mt-4">
-              {isClient ? (
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-2">
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem className="flex-grow">
-                          <FormControl>
-                            <Input
-                              placeholder="Your email"
-                              {...field}
-                              className="bg-background/20 border-border/50 text-accent-foreground placeholder:text-accent-foreground/60"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit" variant="default" className="bg-accent-foreground text-accent">
-                      Subscribe
-                    </Button>
-                  </form>
-                </Form>
-              ) : (
-                <div className="flex gap-2">
-                   <Input placeholder="Your email" disabled className="bg-background/20 border-border/50" />
-                   <Button type="submit" variant="default" className="bg-accent-foreground text-accent" disabled>
-                      Subscribe
-                    </Button>
-                </div>
-              )}
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-2">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem className="flex-grow">
+                        <FormControl>
+                          <Input
+                            placeholder="Your email"
+                            {...field}
+                            className="bg-background/20 border-border/50 text-accent-foreground placeholder:text-accent-foreground/60"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" variant="default" className="bg-accent-foreground text-accent" disabled={isSubmitting}>
+                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Subscribe"}
+                  </Button>
+                </form>
+              </Form>
             </div>
           </div>
         </div>

@@ -4,8 +4,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Mail, Phone } from "lucide-react";
+import { Mail, Phone, Loader2 } from "lucide-react";
 import { collection, addDoc } from "firebase/firestore";
+import { useState } from "react";
 
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -40,27 +41,33 @@ const contactFormSchema = z.object({
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
 
+const defaultValues: Partial<ContactFormValues> = {
+    fullName: "",
+    phone: "",
+    email: "",
+    licenseType: "",
+    message: "",
+};
+
 export default function ContactPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
-    defaultValues: {
-      fullName: "",
-      phone: "",
-      email: "",
-      licenseType: "",
-      message: "",
-    },
+    defaultValues,
   });
 
   async function onSubmit(data: ContactFormValues) {
+    setIsSubmitting(true);
     if (!firestore) {
       toast({
         variant: "destructive",
         title: "Submission Error",
         description: "Firestore is not available. Please try again later.",
       });
+      setIsSubmitting(false);
       return;
     }
 
@@ -82,6 +89,8 @@ export default function ContactPage() {
         title: "Submission Error",
         description: "There was a problem sending your message. Please try again later.",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   }
   
@@ -186,7 +195,10 @@ export default function ContactPage() {
                           </FormItem>
                         )}
                       />
-                      <Button type="submit">Send Message</Button>
+                      <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Send Message
+                      </Button>
                     </form>
                   </Form>
                 </CardContent>
