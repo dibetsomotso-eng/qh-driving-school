@@ -62,7 +62,7 @@ export default function ContactPage() {
     defaultValues,
   });
 
-  const onSubmit = (data: ContactFormValues) => {
+  const onSubmit = async (data: ContactFormValues) => {
     setIsSubmitting(true);
     if (!firestore) {
       toast({
@@ -79,32 +79,30 @@ export default function ContactPage() {
         submissionDate: new Date().toISOString(),
     };
 
-    const contactSubmissionsColRef = collection(firestore, "contactSubmissions");
-
-    addDoc(contactSubmissionsColRef, submissionData)
-      .then(() => {
-          toast({
-            title: "Message Sent!",
-            description: "Thanks for reaching out. We'll get back to you shortly.",
-          });
-          form.reset();
-      })
-      .catch(async (error) => {
-          const permissionError = new FirestorePermissionError({
-              path: contactSubmissionsColRef.path,
-              operation: 'create',
-              requestResourceData: submissionData,
-          });
-          errorEmitter.emit('permission-error', permissionError);
-          toast({
-            variant: "destructive",
-            title: "Submission Error",
-            description: "There was a problem sending your message. Please try again later.",
-          });
-      })
-      .finally(() => {
-          setIsSubmitting(false);
+    try {
+      const contactSubmissionsColRef = collection(firestore, "contactSubmissions");
+      await addDoc(contactSubmissionsColRef, submissionData);
+      toast({
+        title: "Message Sent!",
+        description: "Thanks for reaching out. We'll get back to you shortly.",
       });
+      form.reset();
+    } catch (error) {
+      console.error("Contact submission error:", error);
+      const permissionError = new FirestorePermissionError({
+        path: 'contactSubmissions',
+        operation: 'create',
+        requestResourceData: submissionData,
+      });
+      errorEmitter.emit('permission-error', permissionError);
+      toast({
+        variant: "destructive",
+        title: "Submission Error",
+        description: "There was a problem sending your message. Please try again later.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   return (

@@ -66,7 +66,7 @@ export default function BookingPage() {
     defaultValues,
   });
 
-  const onSubmit = (data: BookingFormValues) => {
+  const onSubmit = async (data: BookingFormValues) => {
     setIsSubmitting(true);
     if (!firestore) {
       toast({
@@ -84,32 +84,30 @@ export default function BookingPage() {
       bookingDate: new Date().toISOString(),
     };
 
-    const bookingsColRef = collection(firestore, "bookings");
-    
-    addDoc(bookingsColRef, bookingData)
-      .then(() => {
-          toast({
-            title: "Booking Request Received!",
-            description: `We've received your request for a lesson on ${bookingData.preferredDate} at ${data.preferredTime}. We will contact you shortly to confirm.`,
-          });
-          form.reset();
-      })
-      .catch(async (error) => {
-          const permissionError = new FirestorePermissionError({
-              path: bookingsColRef.path,
-              operation: 'create',
-              requestResourceData: bookingData,
-          });
-          errorEmitter.emit('permission-error', permissionError);
-          toast({
-            variant: "destructive",
-            title: "Submission Error",
-            description: "There was a problem submitting your booking. Please try again later.",
-          });
-      })
-      .finally(() => {
-          setIsSubmitting(false);
+    try {
+      const bookingsColRef = collection(firestore, "bookings");
+      await addDoc(bookingsColRef, bookingData);
+      toast({
+        title: "Booking Request Received!",
+        description: `We've received your request for a lesson on ${bookingData.preferredDate} at ${data.preferredTime}. We will contact you shortly to confirm.`,
       });
+      form.reset();
+    } catch (error) {
+      console.error("Booking submission error:", error);
+      const permissionError = new FirestorePermissionError({
+        path: 'bookings',
+        operation: 'create',
+        requestResourceData: bookingData,
+      });
+      errorEmitter.emit('permission-error', permissionError);
+      toast({
+        variant: "destructive",
+        title: "Submission Error",
+        description: "There was a problem submitting your booking. Please try again later.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
