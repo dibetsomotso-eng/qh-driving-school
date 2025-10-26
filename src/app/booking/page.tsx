@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFirestore } from "@/firebase";
-import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 
 const bookingFormSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters."),
@@ -68,15 +67,25 @@ export default function BookingPage() {
       bookingDate: new Date().toISOString(),
     };
     
-    if (firestore) {
-        addDocumentNonBlocking(collection(firestore, "bookings"), bookingData);
+    try {
+      if (firestore) {
+        await addDoc(collection(firestore, "bookings"), bookingData);
+        toast({
+          title: "Booking Request Received!",
+          description: `We've received your request for a lesson on ${format(data.preferredDate, "PPP")} at ${data.preferredTime}. We will contact you shortly to confirm.`,
+        });
+        form.reset();
+      } else {
+        throw new Error("Firestore is not available.");
+      }
+    } catch (error) {
+      console.error("Error submitting booking:", error);
+      toast({
+        variant: "destructive",
+        title: "Submission Error",
+        description: "There was a problem submitting your booking. Please try again later.",
+      });
     }
-    
-    toast({
-      title: "Booking Request Received!",
-      description: `We've received your request for a lesson on ${format(data.preferredDate, "PPP")} at ${data.preferredTime}. We will contact you shortly to confirm.`,
-    });
-    form.reset();
   }
 
   return (
@@ -151,7 +160,7 @@ export default function BookingPage() {
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a service or license" />
-                            </SelectTrigger>
+                            </Trigger>
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="learners">Learner's License Prep</SelectItem>

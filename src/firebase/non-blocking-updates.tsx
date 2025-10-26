@@ -87,3 +87,6 @@ export function deleteDocumentNonBlocking(docRef: DocumentReference) {
       )
     });
 }
+
+// This file is intentionally left with a .tsx extension to support potential future
+// use cases where a component or hook might be added. For now, it only exports functions.

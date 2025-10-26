@@ -6,7 +6,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { collection } from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 
 import { useToast } from "@/hooks/use-toast";
 import { Icons } from "@/components/icons";
@@ -15,8 +15,6 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { navLinks } from "@/lib/data";
 import { useFirestore } from "@/firebase";
-import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
-
 
 const newsletterSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -40,19 +38,29 @@ export function Footer() {
     },
   });
 
-  function onSubmit(data: NewsletterFormValues) {
-    if (firestore) {
-      const subscribersCol = collection(firestore, "subscribers");
-      addDocumentNonBlocking(subscribersCol, {
-        ...data,
-        subscriptionDate: new Date().toISOString(),
+  async function onSubmit(data: NewsletterFormValues) {
+    try {
+      if (firestore) {
+        await addDoc(collection(firestore, "subscribers"), {
+          ...data,
+          subscriptionDate: new Date().toISOString(),
+        });
+        toast({
+          title: "Subscribed!",
+          description: "Thanks for joining our newsletter.",
+        });
+        form.reset();
+      } else {
+        throw new Error("Firestore is not available.");
+      }
+    } catch (error) {
+       console.error("Error submitting newsletter:", error);
+       toast({
+        variant: "destructive",
+        title: "Subscription Error",
+        description: "There was a problem with your subscription. Please try again.",
       });
     }
-    toast({
-      title: "Subscribed!",
-      description: "Thanks for joining our newsletter.",
-    });
-    form.reset();
   }
 
   return (

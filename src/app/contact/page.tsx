@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Mail, Phone } from "lucide-react";
-import { collection } from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Icons } from "@/components/icons";
 import { useFirestore } from "@/firebase";
-import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 
 const contactFormSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters."),
@@ -55,20 +54,28 @@ export default function ContactPage() {
     },
   });
 
-  function onSubmit(data: ContactFormValues) {
-    if (firestore) {
-      const contactSubmissionsCol = collection(firestore, "contactSubmissions");
-      addDocumentNonBlocking(contactSubmissionsCol, {
-        ...data,
-        submissionDate: new Date().toISOString(),
+  async function onSubmit(data: ContactFormValues) {
+    try {
+      if (firestore) {
+        await addDoc(collection(firestore, "contactSubmissions"), {
+          ...data,
+          submissionDate: new Date().toISOString(),
+        });
+      }
+      
+      toast({
+        title: "Message Sent!",
+        description: "Thanks for reaching out. We'll get back to you shortly.",
+      });
+      form.reset();
+    } catch (error) {
+      console.error("Error submitting contact form:", error);
+      toast({
+        variant: "destructive",
+        title: "Submission Error",
+        description: "There was a problem sending your message. Please try again later.",
       });
     }
-    
-    toast({
-      title: "Message Sent!",
-      description: "Thanks for reaching out. We'll get back to you shortly.",
-    });
-    form.reset();
   }
   
   return (
