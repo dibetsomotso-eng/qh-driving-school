@@ -39,7 +39,7 @@ export function Footer() {
     defaultValues,
   });
 
-  const onSubmit = async (data: NewsletterFormValues) => {
+  const onSubmit = (data: NewsletterFormValues) => {
     setIsSubmitting(true);
     if (!firestore) {
       toast({
@@ -56,30 +56,31 @@ export function Footer() {
         subscriptionDate: new Date().toISOString(),
     };
 
-    try {
-      const subscribersColRef = collection(firestore, "subscribers");
-      await addDoc(subscribersColRef, subscriberData);
-      toast({
-        title: "Subscribed!",
-        description: "Thanks for joining our newsletter.",
+    addDoc(collection(firestore, "subscribers"), subscriberData)
+      .then(() => {
+          toast({
+            title: "Subscribed!",
+            description: "Thanks for joining our newsletter.",
+          });
+          form.reset();
+      })
+      .catch((error) => {
+          console.error("Newsletter subscription error:", error);
+          const permissionError = new FirestorePermissionError({
+            path: 'subscribers',
+            operation: 'create',
+            requestResourceData: subscriberData,
+          });
+          errorEmitter.emit('permission-error', permissionError);
+          toast({
+            variant: "destructive",
+            title: "Subscription Error",
+            description: "There was a problem with your subscription. Please try again.",
+          });
+      })
+      .finally(() => {
+          setIsSubmitting(false);
       });
-      form.reset();
-    } catch (error) {
-      console.error("Newsletter subscription error:", error);
-      const permissionError = new FirestorePermissionError({
-        path: 'subscribers',
-        operation: 'create',
-        requestResourceData: subscriberData,
-      });
-      errorEmitter.emit('permission-error', permissionError);
-      toast({
-        variant: "destructive",
-        title: "Subscription Error",
-        description: "There was a problem with your subscription. Please try again.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
   }
 
   return (
