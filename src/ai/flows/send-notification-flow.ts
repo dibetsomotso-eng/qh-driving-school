@@ -27,8 +27,8 @@ const sendNotificationFlow = ai.defineFlow(
     outputSchema: z.object({ success: z.boolean(), message: z.string() }),
   },
   async (input) => {
-    const fromEmail = process.env.FROM_EMAIL || 'no-reply@example.com';
-    const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').filter(Boolean);
+    const fromEmail = process.env.FROM_EMAIL || 'henrymteb@gmail.com';
+    const adminEmails = (process.env.ADMIN_EMAILS || 'henrymteb@gmail.com,dibetsomotso@gmail.com').split(',').filter(Boolean);
     const businessName = process.env.BUSINESS_NAME || 'QH Driving School';
 
     if (adminEmails.length === 0) {
@@ -231,3 +231,5 @@ const sendNotificationFlow = ai.defineFlow(
     }
   }
 );
+
+    
