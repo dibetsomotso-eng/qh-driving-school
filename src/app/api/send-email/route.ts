@@ -16,21 +16,21 @@ export async function POST(request: Request) {
   try {
     const { notificationType, data } = await request.json();
 
-    const adminEmails = (process.env.ADMIN_EMAILS || 'dibetsomotso@gmail.com').split(',');
+    const adminEmails = (process.env.ADMIN_EMAILS || 'dibetsomotso@gmail.com').split(',').map(e => e.trim());
     const fromEmail = process.env.FROM_EMAIL || 'dibetsomotso@gmail.com';
     const businessName = process.env.BUSINESS_NAME || 'QH Driving School';
 
     let adminEmailPromise: Promise<any> | null = null;
     let customerEmailPromise: Promise<any> | null = null;
 
-    if (notificationType === 'booking' && 'fullName' in data) {
+    if (notificationType === 'booking') {
       const { adminEmail, customerEmail } = getBookingEmailTemplates(data, adminEmails, fromEmail, businessName);
       adminEmailPromise = sgMail.send(adminEmail);
       customerEmailPromise = sgMail.send(customerEmail);
-    } else if (notificationType === 'contact' && 'fullName' in data) {
+    } else if (notificationType === 'contact') {
       const adminEmail = getContactEmailTemplate(data, adminEmails, fromEmail);
       adminEmailPromise = sgMail.send(adminEmail);
-    } else if (notificationType === 'newsletter' && 'email' in data) {
+    } else if (notificationType === 'newsletter') {
       const { adminEmail, customerEmail } = getNewsletterEmailTemplates(data, adminEmails, fromEmail, businessName);
       adminEmailPromise = sgMail.send(adminEmail);
       customerEmailPromise = sgMail.send(customerEmail);
@@ -43,8 +43,6 @@ export async function POST(request: Request) {
 
     if (!allSucceeded) {
         console.error('One or more emails failed to send.', results);
-        // We still return success to the user as their form submission was received.
-        // The failure is a backend notification issue.
         return NextResponse.json({ success: true, message: 'Form submitted, but there was an issue with email notifications.' });
     }
 
@@ -54,7 +52,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, message: 'Internal server error.' }, { status: 500 });
   }
 }
-
 
 // EMAIL TEMPLATE GENERATORS
 
@@ -79,9 +76,8 @@ const formatLicenseType = (type: string): string => {
     return times[time] || time;
   };
 
-
 function getBookingEmailTemplates(booking: any, adminEmails: string[], fromEmail: string, businessName: string) {
-    const bookingId = booking.bookingId;
+    const bookingId = booking.bookingId || 'NEW';
     const adminEmail = {
         to: adminEmails,
         from: fromEmail,
@@ -113,7 +109,6 @@ function getBookingEmailTemplates(booking: any, adminEmails: string[], fromEmail
                         <tr style="background-color: #e5e7eb;"><td style="font-weight: bold; color: #374151; padding: 12px;">Submitted:</td><td style="color: #111827; padding: 12px;">${new Date(booking.bookingDate).toLocaleString('en-ZA', { dateStyle: 'full', timeStyle: 'short' })}</td></tr>
                       </table>
                       <div style="margin-top: 30px; padding: 20px; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;"><p style="margin: 0; color: #92400e; font-size: 15px; line-height: 1.6;"><strong>⏰ Action Required:</strong><br>Contact ${booking.fullName} at <a href="tel:${booking.phone}" style="color: #92400e; text-decoration: underline;">${booking.phone}</a> within 24 hours to confirm their lesson.</p></div>
-                      <div style="margin-top: 20px; text-align: center;"><a href="tel:${booking.phone}" style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 5px;">📞 Call Customer</a><a href="mailto:${booking.email}" style="display: inline-block; background-color: #10b981; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 5px;">✉️ Email Customer</a></div>
                     </td>
                   </tr>
                   <tr><td style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;"><p style="margin: 0; color: #6b7280; font-size: 12px;">This is an automated notification from ${businessName}</p></td></tr>
@@ -153,18 +148,11 @@ function getBookingEmailTemplates(booking: any, adminEmails: string[], fromEmail
                         <tr><td style="font-weight: bold; color: #374151; padding: 12px;">Preferred Time:</td><td style="color: #111827; padding: 12px;">${formatTimeSlot(booking.preferredTime)}</td></tr>
                         <tr style="background-color: #e5e7eb;"><td style="font-weight: bold; color: #374151; padding: 12px;">Reference Number:</td><td style="color: #6b7280; font-size: 12px; padding: 12px;">${bookingId.substring(0, 8).toUpperCase()}</td></tr>
                       </table>
-                      <h2 style="color: #2563eb; font-size: 18px; margin: 30px 0 15px 0;">🚦 What Happens Next?</h2>
-                      <table width="100%" cellpadding="0" cellspacing="0">
-                        <tr><td style="padding: 12px 0;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td style="width: 30px; vertical-align: top;"><span style="color: #10b981; font-size: 20px;">1️⃣</span></td><td><p style="margin: 0; color: #374151; line-height: 1.6;">We'll review your request and check availability</p></td></tr></table></td></tr>
-                        <tr><td style="padding: 12px 0;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td style="width: 30px; vertical-align: top;"><span style="color: #10b981; font-size: 20px;">2️⃣</span></td><td><p style="margin: 0; color: #374151; line-height: 1.6;">We'll contact you at <strong>${booking.phone}</strong> within 24 hours</p></td></tr></table></td></tr>
-                        <tr><td style="padding: 12px 0;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td style="width: 30px; vertical-align: top;"><span style="color: #10b981; font-size: 20px;">3️⃣</span></td><td><p style="margin: 0; color: #374151; line-height: 1.6;">We'll confirm your lesson time and provide payment details</p></td></tr></table></td></tr>
-                      </table>
                       <div style="margin-top: 30px; padding: 20px; background-color: #eff6ff; border-left: 4px solid #2563eb; border-radius: 4px;"><p style="margin: 0 0 10px 0; color: #1e40af; font-weight: bold;">💡 Pro Tip</p><p style="margin: 0; color: #1e3a8a; font-size: 14px; line-height: 1.6;">While you wait, review the K53 manual and practice your road signs. This will help you get the most out of your lessons!</p></div>
-                      <p style="margin: 30px 0 0 0; font-size: 16px; color: #111827;">Have questions? Feel free to reply to this email or give us a call.</p>
-                      <p style="margin: 20px 0 0 0; font-size: 16px; color: #111827;">Best regards,<br><strong>${businessName} Team</strong></p>
+                      <p style="margin: 30px 0 0 0; font-size: 16px; color: #111827;">Best regards,<br><strong>${businessName} Team</strong></p>
                     </td>
                   </tr>
-                  <tr><td style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;"><p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px;">${businessName} | Vereeniging, Gauteng</p><p style="margin: 0; color: #6b7280; font-size: 12px;">Booking Reference: ${bookingId.substring(0, 8).toUpperCase()}</p></td></tr>
+                  <tr><td style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;"><p style="margin: 0; color: #6b7280; font-size: 12px;">${businessName} | Vereeniging, Gauteng</p></td></tr>
                 </table>
               </td>
             </tr>
@@ -174,7 +162,6 @@ function getBookingEmailTemplates(booking: any, adminEmails: string[], fromEmail
     };
     return { adminEmail, customerEmail };
 }
-
 
 function getContactEmailTemplate(contact: any, adminEmails: string[], fromEmail: string) {
     const adminEmail = {
@@ -198,9 +185,6 @@ function getContactEmailTemplate(contact: any, adminEmails: string[], fromEmail:
               <h3 style="margin-top: 0;">Message:</h3>
               <p style="white-space: pre-wrap; line-height: 1.6;">${contact.message}</p>
             </div>
-            <p style="color: #6b7280; font-size: 14px;">
-              💡 Reply directly to this email to respond to ${contact.fullName}
-            </p>
           </div>
         </body>
         </html>
@@ -221,17 +205,8 @@ function getNewsletterEmailTemplates(subscriber: any, adminEmails: string[], fro
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
               <h2 style="color: #10b981;">🎉 Thanks for Subscribing!</h2>
               <p>Welcome to the ${businessName} community!</p>
-              <p>You'll now receive:</p>
-              <ul style="line-height: 1.8;">
-                <li>🚗 Driving tips and safety advice</li>
-                <li>💰 Special offers and discounts</li>
-                <li>📰 Latest news and updates</li>
-              </ul>
               <p>We're committed to helping you become a confident, safe driver.</p>
-              <p style="margin-top: 30px;">
-                Stay safe on the roads!<br>
-                <strong>${businessName} Team</strong>
-              </p>
+              <p style="margin-top: 30px;">Stay safe on the roads!<br><strong>${businessName} Team</strong></p>
             </div>
           </body>
           </html>
