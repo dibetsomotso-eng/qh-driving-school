@@ -4,8 +4,6 @@ import sgMail from '@sendgrid/mail';
 // Initialize SendGrid
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-} else {
-  console.warn('SENDGRID_API_KEY is not set in .env file. Emails will not be sent.');
 }
 
 export async function POST(request: Request) {
@@ -42,8 +40,8 @@ export async function POST(request: Request) {
     const allSucceeded = results.every(r => r.status === 'fulfilled');
 
     if (!allSucceeded) {
-        console.error('One or more emails failed to send.', results);
-        return NextResponse.json({ success: true, message: 'Form submitted, but there was an issue with email notifications.' });
+      console.error('One or more emails failed to send.', results);
+      return NextResponse.json({ success: true, message: 'Form submitted, but there was an issue with email notifications.' });
     }
 
     return NextResponse.json({ success: true });
@@ -56,33 +54,33 @@ export async function POST(request: Request) {
 // EMAIL TEMPLATE GENERATORS
 
 const formatLicenseType = (type: string): string => {
-    const types: { [key: string]: string } = {
-      'learners': "Learner's License Prep",
-      'code-b': 'Code B (Car) Lesson',
-      'code-eb': 'Code EB (Towing) Lesson',
-      'code-a': 'Code A (Motorcycle) Lesson',
-      'code-c1': 'Code C1 (Medium Truck) Lesson',
-      'renewal': 'License Renewal Assistance',
-    };
-    return types[type] || type;
+  const types: { [key: string]: string } = {
+    'learners': "Learner's License Preparation",
+    'code-b': 'Code B (Car) Driving Lesson',
+    'code-eb': 'Code EB (Towing) Driving Lesson',
+    'code-a': 'Code A (Motorcycle) Driving Lesson',
+    'code-c1': 'Code C1 (Medium Truck) Driving Lesson',
+    'renewal': 'License Renewal Assistance',
   };
-  
-  const formatTimeSlot = (time: string): string => {
-    const times: { [key: string]: string } = {
-      'morning': 'Morning (8am - 12pm)',
-      'afternoon': 'Afternoon (12pm - 4pm)',
-      'late-afternoon': 'Late Afternoon (4pm - 6pm)',
-    };
-    return times[time] || time;
+  return types[type] || type;
+};
+
+const formatTimeSlot = (time: string): string => {
+  const times: { [key: string]: string } = {
+    'morning': 'Morning (8am - 12pm)',
+    'afternoon': 'Afternoon (12pm - 4pm)',
+    'late-afternoon': 'Late Afternoon (4pm - 6pm)',
   };
+  return times[time] || time;
+};
 
 function getBookingEmailTemplates(booking: any, adminEmails: string[], fromEmail: string, businessName: string) {
-    const bookingId = booking.bookingId || 'NEW';
-    const adminEmail = {
-        to: adminEmails,
-        from: fromEmail,
-        subject: `🚗 New Booking Request - ${booking.fullName}`,
-        html: `
+  const bookingId = booking.bookingId || 'NEW';
+  const adminEmail = {
+    to: adminEmails,
+    from: fromEmail,
+    subject: `🚗 New Booking Request - ${booking.fullName}`,
+    html: `
         <!DOCTYPE html>
         <html>
         <head>
@@ -118,13 +116,13 @@ function getBookingEmailTemplates(booking: any, adminEmails: string[], fromEmail
           </table>
         </body>
         </html>`
-    };
+  };
 
-    const customerEmail = {
-        to: booking.email,
-        from: fromEmail,
-        subject: `✅ Booking Request Received - ${businessName}`,
-        html: `
+  const customerEmail = {
+    to: booking.email,
+    from: fromEmail,
+    subject: `✅ Booking Request Received - ${businessName}`,
+    html: `
         <!DOCTYPE html>
         <html>
         <head>
@@ -159,17 +157,17 @@ function getBookingEmailTemplates(booking: any, adminEmails: string[], fromEmail
           </table>
         </body>
         </html>`
-    };
-    return { adminEmail, customerEmail };
+  };
+  return { adminEmail, customerEmail };
 }
 
 function getContactEmailTemplate(contact: any, adminEmails: string[], fromEmail: string, businessName: string) {
-    const adminEmail = {
-        to: adminEmails,
-        from: fromEmail,
-        replyTo: contact.email,
-        subject: `📧 New Contact Form - ${contact.fullName}`,
-        html: `
+  const adminEmail = {
+    to: adminEmails,
+    from: fromEmail,
+    replyTo: contact.email,
+    subject: `📧 New Contact Form - ${contact.fullName}`,
+    html: `
         <!DOCTYPE html>
         <html>
         <body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
@@ -190,16 +188,16 @@ function getContactEmailTemplate(contact: any, adminEmails: string[], fromEmail:
         </body>
         </html>
       `
-    };
-    return adminEmail;
+  };
+  return adminEmail;
 }
 
 function getNewsletterEmailTemplates(subscriber: any, adminEmails: string[], fromEmail: string, businessName: string) {
-    const customerEmail = {
-        to: subscriber.email,
-        from: fromEmail,
-        subject: `🎉 Welcome to ${businessName}!`,
-        html: `
+  const customerEmail = {
+    to: subscriber.email,
+    from: fromEmail,
+    subject: `🎉 Welcome to ${businessName}!`,
+    html: `
           <!DOCTYPE html>
           <html>
           <body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
@@ -212,14 +210,14 @@ function getNewsletterEmailTemplates(subscriber: any, adminEmails: string[], fro
           </body>
           </html>
         `
-      };
+  };
 
-    const adminEmail = {
-        to: adminEmails,
-        from: fromEmail,
-        subject: '📬 New Newsletter Subscriber',
-        html: `<p>New subscriber: <strong>${subscriber.email}</strong></p><p>Subscribed: ${new Date(subscriber.subscriptionDate).toLocaleString('en-ZA')}</p>`
-      };
-      
-    return { adminEmail, customerEmail };
+  const adminEmail = {
+    to: adminEmails,
+    from: fromEmail,
+    subject: '📬 New Newsletter Subscriber',
+    html: `<p>New subscriber: <strong>${subscriber.email}</strong></p><p>Subscribed: ${new Date(subscriber.subscriptionDate).toLocaleString('en-ZA')}</p>`
+  };
+
+  return { adminEmail, customerEmail };
 }
