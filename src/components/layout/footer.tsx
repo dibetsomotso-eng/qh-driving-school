@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -65,19 +64,17 @@ export function Footer() {
           });
           form.reset();
 
-          const notificationPayload = {
-            notificationType: 'newsletter',
-            data: subscriberData
-          };
-
           // Send notification email
           fetch('/api/send-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(notificationPayload),
+            body: JSON.stringify({
+              notificationType: 'newsletter',
+              data: subscriberData
+            }),
           }).then(res => res.json()).then(response => {
             if (!response.success) {
-              console.error("API Error: Could not send newsletter confirmation email.");
+              console.error("Email Error: Could not send newsletter confirmation email.");
             }
           }).catch(err => {
               console.error("Fetch Error: Could not send newsletter confirmation email.", err);

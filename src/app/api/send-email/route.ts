@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       adminEmailPromise = sgMail.send(adminEmail);
       customerEmailPromise = sgMail.send(customerEmail);
     } else if (notificationType === 'contact') {
-      const adminEmail = getContactEmailTemplate(data, adminEmails, fromEmail);
+      const adminEmail = getContactEmailTemplate(data, adminEmails, fromEmail, businessName);
       adminEmailPromise = sgMail.send(adminEmail);
     } else if (notificationType === 'newsletter') {
       const { adminEmail, customerEmail } = getNewsletterEmailTemplates(data, adminEmails, fromEmail, businessName);
@@ -163,7 +163,7 @@ function getBookingEmailTemplates(booking: any, adminEmails: string[], fromEmail
     return { adminEmail, customerEmail };
 }
 
-function getContactEmailTemplate(contact: any, adminEmails: string[], fromEmail: string) {
+function getContactEmailTemplate(contact: any, adminEmails: string[], fromEmail: string, businessName: string) {
     const adminEmail = {
         to: adminEmails,
         from: fromEmail,
@@ -185,6 +185,7 @@ function getContactEmailTemplate(contact: any, adminEmails: string[], fromEmail:
               <h3 style="margin-top: 0;">Message:</h3>
               <p style="white-space: pre-wrap; line-height: 1.6;">${contact.message}</p>
             </div>
+            <p style="color: #6b7280; font-size: 14px; text-align: center; margin-top: 40px;">This is an automated notification from ${businessName}</p>
           </div>
         </body>
         </html>

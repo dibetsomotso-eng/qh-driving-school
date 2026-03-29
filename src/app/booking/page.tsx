@@ -91,27 +91,19 @@ export default function BookingPage() {
         });
         form.reset();
 
-        const notificationPayload = {
-          notificationType: 'booking',
-          data: { ...bookingData, bookingId: docRef.id }
-        };
-
         // Send notification email via API route
         fetch('/api/send-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(notificationPayload),
+          body: JSON.stringify({
+            notificationType: 'booking',
+            data: { ...bookingData, bookingId: docRef.id }
+          }),
         })
         .then(res => res.json())
         .then(response => {
           if (!response.success) {
-            console.error("API Error: Could not send confirmation emails.");
-            // Non-blocking toast for admin/user
-            toast({
-              variant: "destructive",
-              title: "Email Error",
-              description: "Booking received, but confirmation email failed to send.",
-            });
+            console.error("Email Error: Could not send confirmation emails.");
           }
         }).catch(err => {
             console.error("Fetch Error: Could not send confirmation emails.", err);

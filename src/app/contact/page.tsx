@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -86,20 +85,18 @@ export default function ContactPage() {
               description: "Thanks for reaching out. We'll get back to you shortly.",
             });
             form.reset();
-
-            const notificationPayload = {
-              notificationType: 'contact',
-              data: submissionData
-            };
             
             // Send notification email
             fetch('/api/send-email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(notificationPayload),
+                body: JSON.stringify({
+                  notificationType: 'contact',
+                  data: submissionData
+                }),
             }).then(res => res.json()).then(response => {
                 if (!response.success) {
-                    console.error("API Error: Could not send contact notification email.");
+                    console.error("Email Error: Could not send contact notification email.");
                 }
             }).catch(err => {
                 console.error("Fetch Error: Could not send contact notification email.", err);
