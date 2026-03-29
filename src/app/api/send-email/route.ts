@@ -8,6 +8,7 @@ if (process.env.SENDGRID_API_KEY) {
 
 export async function POST(request: Request) {
   if (!process.env.SENDGRID_API_KEY) {
+    console.error('SendGrid API key is missing from environment variables.');
     return NextResponse.json({ success: false, message: 'Email service is not configured.' }, { status: 500 });
   }
 
