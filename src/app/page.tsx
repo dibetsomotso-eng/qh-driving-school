@@ -16,7 +16,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { services, testimonials, whyChooseUs } from '@/lib/data';
+import { services, vehicleServices, testimonials, whyChooseUs } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { ArrowRight } from 'lucide-react';
 
@@ -58,7 +58,7 @@ export default function Home() {
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-headline font-bold">Our Services</h2>
               <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
-                From your learner's license to advanced driving codes, we provide a clear path to getting you on the road.
+                From your learner&apos;s license to advanced driving codes, we provide a clear path to getting you on the road.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -99,8 +99,42 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Why Choose Us */}
+        {/* Vehicle Services Preview */}
         <section className="py-16 md:py-24">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-headline font-bold">Vehicle Services</h2>
+              <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
+                Beyond driving lessons — we handle car registration, license disks, police clearances, VIN updates, and more.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {vehicleServices.slice(0, 5).map((service) => {
+                const Icon = service.icon;
+                return (
+                  <Link key={service.slug} href={`/services/${service.slug}`} className="group">
+                    <Card className="text-center p-4 shadow hover:shadow-lg transition-shadow duration-300 h-full">
+                      <CardContent className="flex flex-col items-center gap-3 p-2">
+                        <div className="flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                          <Icon className="h-6 w-6" />
+                        </div>
+                        <p className="text-sm font-semibold text-center leading-tight">{service.title}</p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+            <div className="text-center mt-10">
+              <Button asChild variant="outline">
+                <Link href="/services/vehicle">View All Vehicle Services <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Why Choose Us */}
+        <section className="py-16 md:py-24 bg-card">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-headline font-bold">Why Choose QH Driving School?</h2>
@@ -145,7 +179,7 @@ export default function Home() {
                       <Card className="h-full flex flex-col">
                         <CardContent className="p-6 flex-grow flex flex-col justify-between">
                           <blockquote className="text-lg italic border-l-4 border-primary pl-4 mb-4">
-                            "{testimonial.quote}"
+                            &ldquo;{testimonial.quote}&rdquo;
                           </blockquote>
                           <div className="flex items-center mt-4">
                             <Avatar>

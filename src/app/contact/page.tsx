@@ -199,7 +199,7 @@ export default function ContactPage() {
                                 <SelectContent>
                                   <SelectItem value="code-a-b-eb">Code A, B & EB</SelectItem>
                                   <SelectItem value="code-c1-ec">Code C1 & Code EC</SelectItem>
-                                  <SelectItem value="learners">Learner's License</SelectItem>
+                                  <SelectItem value="learners">Learner&apos;s License</SelectItem>
                                   <SelectItem value="renewals">License Renewal</SelectItem>
                                   <SelectItem value="other">Other</SelectItem>
                                 </SelectContent>

@@ -6,14 +6,12 @@ import { Button } from '@/components/ui/button';
 import { useCollection } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
-import { type BlogPost, blogPosts as fallbackPosts } from '@/lib/data';
+import { type BlogPost } from '@/lib/data';
 import { useMemoFirebase } from '@/firebase/provider';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useEffect, useState } from 'react';
 
 export default function BlogPage() {
   const firestore = useFirestore();
-  const [displayPosts, setDisplayPosts] = useState<BlogPost[]>([]);
 
   const postsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -23,26 +21,13 @@ export default function BlogPage() {
     );
   }, [firestore]);
 
-  const { data: posts, isLoading, error } = useCollection<BlogPost>(postsQuery);
-
-  useEffect(() => {
-    if (!isLoading) {
-      // If there's an error or no posts from Firestore, use the fallback data.
-      if (error || !posts || posts.length === 0) {
-        // Sort fallback posts just in case they aren't in order
-        const sortedFallback = [...fallbackPosts].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
-        setDisplayPosts(sortedFallback);
-      } else {
-        setDisplayPosts(posts);
-      }
-    }
-  }, [posts, isLoading, error]);
+  const { data: posts, isLoading } = useCollection<BlogPost>(postsQuery);
 
   return (
     <>
       <section className="bg-card py-16 md:py-24">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-headline font-bold">Driving Tips & News</h1>
+          <h1 className="text-4xl md:text-5xl font-headline font-bold">Driving Tips &amp; News</h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
             Stay updated with our latest articles, driving tips, and success stories from our students.
           </p>
@@ -61,14 +46,14 @@ export default function BlogPage() {
                 </CardHeader>
                 <CardContent>
                   <Skeleton className="h-4 w-full" />
-                   <Skeleton className="h-4 w-full mt-1" />
+                  <Skeleton className="h-4 w-full mt-1" />
                 </CardContent>
                 <CardFooter className="p-6 pt-0">
                   <Skeleton className="h-10 w-24" />
                 </CardFooter>
               </Card>
             ))}
-            {!isLoading && displayPosts.map((post) => {
+            {!isLoading && posts?.map((post) => {
               const postSlug = post.slug || post.title.toLowerCase().replace(/ /g, '-');
               return (
                 <Card key={post.id || postSlug} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -100,11 +85,11 @@ export default function BlogPage() {
               );
             })}
           </div>
-           {(!isLoading && displayPosts.length === 0) && (
-              <div className="text-center col-span-full">
-                  <p className="text-muted-foreground">No blog posts found. Check back later!</p>
-              </div>
-            )}
+          {!isLoading && (!posts || posts.length === 0) && (
+            <div className="text-center col-span-full">
+              <p className="text-muted-foreground">No blog posts found. Check back later!</p>
+            </div>
+          )}
         </div>
       </section>
     </>

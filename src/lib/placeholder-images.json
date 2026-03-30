@@ -139,6 +139,66 @@
       "imageHint": "happy student"
     },
     {
+      "id": "service-car-registration",
+      "description": "A vehicle registration document and car keys on a desk.",
+      "imageUrl": "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "car registration"
+    },
+    {
+      "id": "service-number-plates",
+      "description": "A South African vehicle number plate close-up.",
+      "imageUrl": "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "number plate"
+    },
+    {
+      "id": "service-disk-renewal",
+      "description": "A vehicle license disk displayed on a windscreen.",
+      "imageUrl": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "license disk"
+    },
+    {
+      "id": "service-police-clearance",
+      "description": "An official South African Police Service building.",
+      "imageUrl": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "police clearance"
+    },
+    {
+      "id": "service-export-clearance",
+      "description": "A car being loaded onto a shipping container at a port.",
+      "imageUrl": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "car export"
+    },
+    {
+      "id": "service-vin-update",
+      "description": "A close-up of a vehicle identification number plate on a dashboard.",
+      "imageUrl": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "vehicle identification"
+    },
+    {
+      "id": "service-roadworthy",
+      "description": "A mechanic inspecting the undercarriage of a vehicle on a lift.",
+      "imageUrl": "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "vehicle inspection"
+    },
+    {
+      "id": "service-duplicates",
+      "description": "Official documents and a pen on a desk.",
+      "imageUrl": "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "official documents"
+    },
+    {
+      "id": "service-microdots",
+      "description": "A magnifying glass showing microscopic dots on a surface.",
+      "imageUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "microdot security"
+    },
+    {
+      "id": "service-vintage",
+      "description": "A beautifully restored classic vintage car at a show.",
+      "imageUrl": "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "vintage car"
+    },
+    {
       "id": "contact-map",
       "description": "A map showing the location of QH Driving School in Roodepoort.",
       "imageUrl": "https://images.unsplash.com/photo-1717700299581-c2fc3fad4ee8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjaXR5JTIwbWFwfGVufDB8fHx8MTc1OTcxNjc0M3ww&ixlib=rb-4.1.0&q=80&w=1080",

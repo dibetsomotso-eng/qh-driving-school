@@ -98,10 +98,10 @@ export default function AboutPage() {
               <CardContent>
                 <h3 className="text-2xl font-bold">Henry Qoli Mtebula</h3>
                 <p className="mt-4 text-muted-foreground">
-                  With over 15 years of experience in driver education, Henry Qoli Mtebula founded QH Driving School with a vision to create a more supportive and effective learning experience for aspiring drivers. His passion for road safety and his patient, encouraging teaching style are the cornerstones of our school's philosophy.
+                  With over 15 years of experience in driver education, Henry Qoli Mtebula founded QH Driving School with a vision to create a more supportive and effective learning experience for aspiring drivers. His passion for road safety and his patient, encouraging teaching style are the cornerstones of our school&apos;s philosophy.
                 </p>
                 <p className="mt-4 text-muted-foreground">
-                  "I believe anyone can become a great driver with the right guidance. My goal is to empower every student with the skills and confidence they need not just to pass the test, but to be a safe and responsible driver for life."
+                  &ldquo;I believe anyone can become a great driver with the right guidance. My goal is to empower every student with the skills and confidence they need not just to pass the test, but to be a safe and responsible driver for life.&rdquo;
                 </p>
               </CardContent>
             </div>

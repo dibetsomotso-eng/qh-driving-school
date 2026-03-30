@@ -3,6 +3,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { WhatsAppButton } from '@/components/whatsapp-button';
+import { ChatWidget } from '@/components/ChatWidget';
 import { ThemeProvider } from '@/components/theme-provider';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import './globals.css';
@@ -38,6 +39,7 @@ export default function RootLayout({
             <main>{children}</main>
             <Footer />
             <WhatsAppButton />
+            <ChatWidget />
             <Toaster />
           </ThemeProvider>
         </FirebaseClientProvider>

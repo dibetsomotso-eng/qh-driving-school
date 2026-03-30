@@ -31,11 +31,12 @@ function AdminHeader() {
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const { user, isUserLoading } = useUser();
   const pathname = usePathname();
+  const router = useRouter();
 
-  // The middleware now handles redirection, so this component's logic is much simpler.
-  // We just need to decide whether to render the UI, primarily the header.
+  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+  const isLoginPage = pathname === '/admin/login';
 
-  // While checking user auth, show a full-screen loader.
+  // Show a loader while Firebase resolves the auth state.
   if (isUserLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -44,12 +45,24 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  // An admin is a user with the specific admin email.
-  const isAdmin = user?.email === 'admin@example.com';
-  
-  // Don't show the header on the login page or if the user is not an admin.
-  // The middleware prevents non-admins from seeing protected pages.
-  const showHeader = isAdmin && pathname !== '/admin/login';
+  // Redirect unauthenticated users away from protected admin pages.
+  if (!isLoginPage && !user) {
+    router.replace('/admin/login');
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Redirect authenticated admin away from the login page.
+  if (isLoginPage && user) {
+    router.replace('/admin');
+    return null;
+  }
+
+  const isAdmin = adminEmail ? user?.email === adminEmail : !!user;
+  const showHeader = isAdmin && !isLoginPage;
   
   return (
     <div className="min-h-screen bg-background">

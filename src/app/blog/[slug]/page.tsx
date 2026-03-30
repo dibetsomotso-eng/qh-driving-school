@@ -10,7 +10,7 @@ import { useMemoFirebase } from '@/firebase/provider';
 import { useFirestore } from '@/firebase';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { type BlogPost, blogPosts as fallbackPosts } from '@/lib/data';
+import { type BlogPost } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function BlogPostPage({ params }: { params: { slug: string } }) {
@@ -18,7 +18,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   const firestore = useFirestore();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [notFound404, setNotFound404] = useState(false);
 
   const postQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -32,9 +32,8 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   useEffect(() => {
     const fetchPost = async () => {
       setIsLoading(true);
-      setError(false);
+      setNotFound404(false);
 
-      // Try fetching from Firestore first
       if (postQuery) {
         try {
           const snapshot = await getDocs(postQuery);
@@ -42,72 +41,63 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             const doc = snapshot.docs[0];
             setPost({ ...doc.data() as BlogPost, id: doc.id });
             setIsLoading(false);
-            return; // Exit if found in Firestore
+            return;
           }
         } catch (err) {
-          console.error("Firestore fetch failed, falling back to local data.", err);
-          // Don't set error state here, allow fallback
+          console.error('Firestore fetch failed:', err);
         }
       }
-      
-      // Fallback to local data if Firestore fetch fails or returns empty
-      const fallbackPost = fallbackPosts.find(p => p.slug === slug);
-      if (fallbackPost) {
-        setPost(fallbackPost);
-      } else {
-        setError(true); // Only set error if not found in fallback either
-      }
 
+      setNotFound404(true);
       setIsLoading(false);
     };
 
     fetchPost();
-
   }, [postQuery, slug]);
 
   if (isLoading) {
     return (
-        <div className="container mx-auto px-4 py-16 md:py-24 max-w-4xl">
-            <Skeleton className="h-12 w-32 mb-8" />
-            <div className="relative w-full h-[40vh] md:h-[50vh] mb-8">
-              <Skeleton className="w-full h-full" />
-            </div>
-            <Skeleton className="h-8 w-3/4 mb-4" />
-            <Skeleton className="h-6 w-1/2 mb-8" />
-            <div className="space-y-4">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-[85%]" />
-                <Skeleton className="h-4 w-[90%]" />
-            </div>
+      <div className="container mx-auto px-4 py-16 md:py-24 max-w-4xl">
+        <Skeleton className="h-12 w-32 mb-8" />
+        <div className="relative w-full h-[40vh] md:h-[50vh] mb-8">
+          <Skeleton className="w-full h-full" />
         </div>
+        <Skeleton className="h-8 w-3/4 mb-4" />
+        <Skeleton className="h-6 w-1/2 mb-8" />
+        <div className="space-y-4">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-[85%]" />
+          <Skeleton className="h-4 w-[90%]" />
+        </div>
+      </div>
     );
   }
 
-  if (error || !post) {
+  if (notFound404 || !post) {
     notFound();
   }
 
   return (
     <>
       <section className="relative w-full h-[40vh] md:h-[50vh] flex items-center justify-center text-center text-white">
-        {post.imageUrl && (
+        {post!.imageUrl && (
           <Image
-            src={post.imageUrl}
-            alt={post.title}
+            src={post!.imageUrl}
+            alt={post!.title}
             fill
             className="object-cover"
             priority
-            data-ai-hint={post.imageHint}
+            data-ai-hint={post!.imageHint}
           />
         )}
         <div className="absolute inset-0 bg-black/60" />
         <div className="relative z-10 p-4 max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-headline font-bold tracking-tight text-primary">
-            {post.title}
+            {post!.title}
           </h1>
           <p className="mt-4 text-lg text-neutral-200">
-            Published on {new Date(post.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            Published on {new Date(post!.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
       </section>
@@ -124,7 +114,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             <Card>
               <CardContent className="p-6 md:p-8">
                 <article className="prose dark:prose-invert max-w-none">
-                  <ReactMarkdown>{post.content}</ReactMarkdown>
+                  <ReactMarkdown>{post!.content}</ReactMarkdown>
                 </article>
               </CardContent>
             </Card>

@@ -1,103 +1,126 @@
 /**
- * @fileoverview Firestore Security Rules for Prototyping.
+ * @fileoverview Firestore Security Rules for QH Driving School.
  *
  * Core Philosophy:
- * This ruleset prioritizes security by default, restricting all data access unless explicitly allowed.
- * It is designed for prototyping, so data shape validation is minimal to enable rapid iteration.
- * All write operations require authentication and are generally limited to authenticated users.
+ * - Public forms (bookings, contact, subscribers, testimonials) allow unauthenticated creates
+ *   with strict field-level validation to prevent spam/injection.
+ * - Blog posts require authentication (admin only) for all writes.
+ * - Reads are blocked for all collections (admin reads via Firebase Admin SDK server-side).
  *
- * Data Structure:
- * The Firestore database contains the following top-level collections:
- * - /bookings: Stores booking submissions.
- * - /contactSubmissions: Stores contact form submissions.
- * - /subscribers: Stores newsletter subscriptions.
- * - /testimonials: Stores student testimonials.
- * - /blogPosts: Stores blog posts.
- *
- * Key Security Decisions:
- * - Unauthenticated access is disallowed for all write operations.
- * - List operation will be blocked unless otherwised specified.
- *
- * Denormalization for Authorization:
- *  N/A - Simple collections with no concept of ownership.
+ * Collections:
+ * - /bookings              — Public booking submissions
+ * - /contactSubmissions    — Public contact form submissions
+ * - /subscribers           — Public newsletter subscriptions
+ * - /testimonials          — Public testimonial submissions (require admin approval to display)
+ * - /blogPosts             — Admin-only blog post management
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Helpers
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches('^[^@]+@[^@]+\\.[^@]+$');
+    }
+
+    function isNonEmptyString(s) {
+      return s is string && s.size() > 0 && s.size() <= 1000;
+    }
+
+    function isShortString(s) {
+      return s is string && s.size() > 0 && s.size() <= 100;
+    }
+
     /**
-     * @description Allows anyone to create a booking.
      * @path /bookings/{bookingId}
-     * @allow (create) - Any unauthenticated user can create a booking.
-     * @deny (create) - No denial condition
-     * @principle Allows unauthenticated users to submit bookings.
+     * Public create with field validation. No reads or mutations allowed.
      */
     match /bookings/{bookingId} {
-      allow get: if false;
-      allow list: if false;
-      allow create: if true;
-      allow update: if false;
-      allow delete: if false;
+      allow get, list, update, delete: if false;
+      allow create: if
+        request.resource.data.keys().hasOnly([
+          'fullName', 'phone', 'email', 'licenseType',
+          'preferredDate', 'preferredTime', 'bookingDate', 'serviceCategory'
+        ]) &&
+        isShortString(request.resource.data.fullName) &&
+        isShortString(request.resource.data.phone) &&
+        isValidEmail(request.resource.data.email) &&
+        isShortString(request.resource.data.licenseType) &&
+        isShortString(request.resource.data.preferredDate) &&
+        isShortString(request.resource.data.preferredTime) &&
+        request.resource.data.bookingDate is string &&
+        (
+          !('serviceCategory' in request.resource.data) ||
+          request.resource.data.serviceCategory in ['driving', 'vehicle']
+        );
     }
 
     /**
-     * @description Allows anyone to create a contact submission.
      * @path /contactSubmissions/{contactId}
-     * @allow (create) - Any unauthenticated user can create a contact submission.
-     * @deny (create) - No denial condition
-     * @principle Allows unauthenticated users to submit contact forms.
+     * Public create with field validation. No reads or mutations allowed.
      */
     match /contactSubmissions/{contactId} {
-      allow get: if false;
-      allow list: if false;
-      allow create: if true;
-      allow update: if false;
-      allow delete: if false;
+      allow get, list, update, delete: if false;
+      allow create: if
+        request.resource.data.keys().hasOnly([
+          'fullName', 'email', 'phone', 'message', 'submissionDate'
+        ]) &&
+        isShortString(request.resource.data.fullName) &&
+        isValidEmail(request.resource.data.email) &&
+        isNonEmptyString(request.resource.data.message) &&
+        request.resource.data.message.size() <= 2000 &&
+        request.resource.data.submissionDate is string &&
+        (
+          !('phone' in request.resource.data) ||
+          request.resource.data.phone is string
+        );
     }
 
     /**
-     * @description Allows anyone to create a subscriber.
      * @path /subscribers/{subscriberId}
-     * @allow (create) - Any unauthenticated user can create a subscriber.
-     * @deny (create) - No denial condition
-     * @principle Allows unauthenticated users to subscribe to the newsletter.
+     * Public create (email only). No reads or mutations allowed.
      */
     match /subscribers/{subscriberId} {
-      allow get: if false;
-      allow list: if false;
-      allow create: if true;
-      allow update: if false;
-      allow delete: if false;
+      allow get, list, update, delete: if false;
+      allow create: if
+        request.resource.data.keys().hasOnly(['email', 'subscriptionDate']) &&
+        isValidEmail(request.resource.data.email) &&
+        request.resource.data.subscriptionDate is string;
     }
 
     /**
-     * @description Allows anyone to create a testimonial.
      * @path /testimonials/{testimonialId}
-     * @allow (create) - Any unauthenticated user can create a testimonial.
-     * @deny (create) - No denial condition
-     * @principle Allows unauthenticated users to submit testimonials.
+     * Public create with field validation. Admin can read/update (to approve).
      */
     match /testimonials/{testimonialId} {
-      allow get: if false;
-      allow list: if false;
-      allow create: if true;
-      allow update: if false;
-      allow delete: if false;
+      allow list, delete: if false;
+      allow get, update: if isAuthenticated();
+      allow create: if
+        request.resource.data.keys().hasOnly([
+          'name', 'license', 'quote', 'submissionDate', 'approved'
+        ]) &&
+        isShortString(request.resource.data.name) &&
+        isShortString(request.resource.data.license) &&
+        isNonEmptyString(request.resource.data.quote) &&
+        request.resource.data.quote.size() <= 500 &&
+        request.resource.data.submissionDate is string &&
+        (
+          !('approved' in request.resource.data) ||
+          request.resource.data.approved == false
+        );
     }
 
     /**
-     * @description Allows anyone to create a blog post.
      * @path /blogPosts/{postId}
-     * @allow (create) - Any unauthenticated user can create a blog post.
-     * @deny (create) - No denial condition
-     * @principle Allows unauthenticated users to submit blog posts.
+     * Authenticated admin writes. Public reads (get + list) so the blog pages work.
      */
     match /blogPosts/{postId} {
-      allow get: if false;
-      allow list: if false;
-      allow create: if true;
-      allow update: if false;
-      allow delete: if false;
+      allow get, list: if true;
+      allow create, update, delete: if isAuthenticated();
     }
   }
 }

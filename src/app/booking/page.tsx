@@ -34,11 +34,16 @@ import { useFirestore } from "@/firebase";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 
+const SA_PHONE_REGEX = /^(\+27|0)[6-8][0-9]{8}$/;
+
 const bookingFormSchema = z.object({
+  serviceCategory: z.enum(["driving", "vehicle"], {
+    required_error: "Please select a service category.",
+  }),
   fullName: z.string().min(2, "Full name must be at least 2 characters."),
-  phone: z.string().min(10, "Please enter a valid phone number."),
+  phone: z.string().regex(SA_PHONE_REGEX, "Please enter a valid South African phone number (e.g. 0812345678)."),
   email: z.string().email("Please enter a valid email address."),
-  licenseType: z.string().min(1, "Please select a license type."),
+  licenseType: z.string().min(1, "Please select a service."),
   preferredDate: z.date({
     required_error: "A preferred date is required.",
   }),
@@ -47,26 +52,51 @@ const bookingFormSchema = z.object({
 
 type BookingFormValues = z.infer<typeof bookingFormSchema>;
 
-const defaultValues: Partial<BookingFormValues> = {
-    fullName: "",
-    phone: "",
-    email: "",
-    licenseType: "",
-    preferredTime: "",
-};
+const drivingServices = [
+  { value: "learners", label: "Learner\u2019s License Prep" },
+  { value: "code-b", label: "Code B (Car) Lesson" },
+  { value: "code-eb", label: "Code EB (Towing) Lesson" },
+  { value: "code-a", label: "Code A (Motorcycle) Lesson" },
+  { value: "code-c1", label: "Code C1 (Medium Truck) Lesson" },
+  { value: "renewal", label: "License Renewal Assistance" },
+  { value: "prdp", label: "PrDP Application" },
+];
+
+const vehicleServiceOptions = [
+  { value: "car-registration", label: "Car Registration & Licensing" },
+  { value: "number-plates", label: "Number Plates" },
+  { value: "disk-renewal", label: "Disk Renewal" },
+  { value: "police-clearance", label: "Police Clearance" },
+  { value: "export-clearance", label: "Export Police Clearance" },
+  { value: "vin-update", label: "VIN Update" },
+  { value: "roadworthy", label: "Roadworthy Certificate" },
+  { value: "duplicates", label: "Duplicates" },
+  { value: "microdots", label: "Microdots" },
+  { value: "vintage-registration", label: "Vintage Car Registration" },
+];
 
 export default function BookingPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
-    defaultValues,
+    defaultValues: {
+      serviceCategory: undefined,
+      fullName: "",
+      phone: "",
+      email: "",
+      licenseType: "",
+      preferredTime: "",
+    },
   });
 
-  const onSubmit = (data: BookingFormValues) => {
+  const selectedCategory = form.watch("serviceCategory");
+
+  const onSubmit = async (data: BookingFormValues) => {
     setIsSubmitting(true);
+
     if (!firestore) {
       toast({
         variant: "destructive",
@@ -76,65 +106,70 @@ export default function BookingPage() {
       setIsSubmitting(false);
       return;
     }
-    
+
     const bookingData = {
       ...data,
       preferredDate: format(data.preferredDate, "PPP"),
       bookingDate: new Date().toISOString(),
     };
 
-    addDoc(collection(firestore, "bookings"), bookingData)
-      .then((docRef) => {
-        toast({
-          title: "Booking Request Received!",
-          description: "We've received your request and will contact you shortly.",
-        });
-        form.reset();
+    let docRef;
+    try {
+      docRef = await addDoc(collection(firestore, "bookings"), bookingData);
+    } catch (error) {
+      const permissionError = new FirestorePermissionError({
+        path: "bookings",
+        operation: "create",
+        requestResourceData: bookingData,
+      });
+      errorEmitter.emit("permission-error", permissionError);
+      toast({
+        variant: "destructive",
+        title: "Submission Error",
+        description: "There was a problem submitting your booking. Please try again later.",
+      });
+      setIsSubmitting(false);
+      return;
+    }
 
-        // Send notification email via API route
-        fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            notificationType: 'booking',
-            data: { ...bookingData, bookingId: docRef.id }
-          }),
-        })
-        .then(res => res.json())
-        .then(response => {
-          if (!response.success) {
-            console.error("Email Error: Could not send confirmation emails.");
-          }
-        }).catch(err => {
-            console.error("Fetch Error: Could not send confirmation emails.", err);
-        });
-      })
-      .catch((error) => {
-        const permissionError = new FirestorePermissionError({
-          path: 'bookings',
-          operation: 'create',
-          requestResourceData: bookingData,
-        });
-        errorEmitter.emit('permission-error', permissionError);
-        
+    // Send confirmation emails and surface any failure to the user.
+    try {
+      const emailRes = await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          notificationType: "booking",
+          data: { ...bookingData, bookingId: docRef.id },
+        }),
+      });
+      const emailJson = await emailRes.json();
+      if (!emailJson.success) {
+        console.error("Email notification failed:", emailJson.message);
         toast({
           variant: "destructive",
-          title: "Submission Error",
-          description: "There was a problem submitting your booking. Please try again later.",
+          title: "Email Not Sent",
+          description: "Your booking was saved but we could not send a confirmation email. Please contact us directly.",
         });
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
+      }
+    } catch (err) {
+      console.error("Email fetch error:", err);
+    }
+
+    toast({
+      title: "Booking Request Received!",
+      description: "We\u2019ve received your request and will contact you shortly to confirm.",
+    });
+    form.reset();
+    setIsSubmitting(false);
   };
 
   return (
     <>
       <section className="bg-card py-16 md:py-24">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-headline font-bold">Book Your Lesson</h1>
+          <h1 className="text-4xl md:text-5xl font-headline font-bold">Book a Service</h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-            Take the first step towards your driving freedom. Fill out the form below to request a lesson.
+            Whether you need a driving lesson or help with vehicle paperwork, fill out the form below and we will be in touch.
           </p>
         </div>
       </section>
@@ -149,6 +184,37 @@ export default function BookingPage() {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+
+                  {/* Service Category */}
+                  <FormField
+                    control={form.control}
+                    name="serviceCategory"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Service Category</FormLabel>
+                        <Select
+                          onValueChange={(val) => {
+                            field.onChange(val);
+                            form.setValue("licenseType", "");
+                          }}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select driving or vehicle services" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="driving">Driving Lessons &amp; Licenses</SelectItem>
+                            <SelectItem value="vehicle">Vehicle Registration &amp; Documentation</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Personal Details */}
                   <FormField
                     control={form.control}
                     name="fullName"
@@ -170,7 +236,7 @@ export default function BookingPage() {
                         <FormItem>
                           <FormLabel>Phone Number</FormLabel>
                           <FormControl>
-                            <Input type="tel" placeholder="+27 12 345 6789" {...field} />
+                            <Input type="tel" placeholder="0812345678" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -190,31 +256,38 @@ export default function BookingPage() {
                       )}
                     />
                   </div>
-                  <FormField
-                    control={form.control}
-                    name="licenseType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>What are you booking for?</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a service or license" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="learners">Learner's License Prep</SelectItem>
-                            <SelectItem value="code-b">Code B (Car) Lesson</SelectItem>
-                            <SelectItem value="code-eb">Code EB (Towing) Lesson</SelectItem>
-                            <SelectItem value="code-a">Code A (Motorcycle) Lesson</SelectItem>
-                            <SelectItem value="code-c1">Code C1 (Medium Truck) Lesson</SelectItem>
-                            <SelectItem value="renewal">License Renewal Assistance</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+
+                  {/* Service Selection — shown once category is chosen */}
+                  {selectedCategory && (
+                    <FormField
+                      control={form.control}
+                      name="licenseType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {selectedCategory === "driving" ? "What are you booking for?" : "Which vehicle service do you need?"}
+                          </FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a service" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {(selectedCategory === "driving" ? drivingServices : vehicleServiceOptions).map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
+                  {/* Date & Time */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <FormField
                       control={form.control}
@@ -232,11 +305,7 @@ export default function BookingPage() {
                                     !field.value && "text-muted-foreground"
                                   )}
                                 >
-                                  {field.value ? (
-                                    format(field.value, "PPP")
-                                  ) : (
-                                    <span>Pick a date</span>
-                                  )}
+                                  {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
                               </FormControl>
@@ -247,7 +316,7 @@ export default function BookingPage() {
                                 selected={field.value}
                                 onSelect={field.onChange}
                                 disabled={(date) =>
-                                  date < new Date(new Date().setHours(0,0,0,0))
+                                  date < new Date(new Date().setHours(0, 0, 0, 0))
                                 }
                                 initialFocus
                               />
@@ -263,16 +332,16 @@ export default function BookingPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Preferred Time Slot</FormLabel>
-                           <Select onValueChange={field.onChange} value={field.value}>
+                          <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select a time" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="morning">Morning (8am - 12pm)</SelectItem>
-                              <SelectItem value="afternoon">Afternoon (12pm - 4pm)</SelectItem>
-                              <SelectItem value="late-afternoon">Late Afternoon (4pm - 6pm)</SelectItem>
+                              <SelectItem value="morning">Morning (8am – 12pm)</SelectItem>
+                              <SelectItem value="afternoon">Afternoon (12pm – 4pm)</SelectItem>
+                              <SelectItem value="late-afternoon">Late Afternoon (4pm – 6pm)</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -280,7 +349,7 @@ export default function BookingPage() {
                       )}
                     />
                   </div>
-                  
+
                   <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Request Booking
