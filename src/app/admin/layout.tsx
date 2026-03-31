@@ -3,7 +3,7 @@
 
 import { useUser } from '@/firebase';
 import { usePathname, useRouter } from 'next/navigation';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/firebase';
 import { Loader2 } from 'lucide-react';
@@ -32,12 +32,22 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const { user, isUserLoading } = useUser();
   const pathname = usePathname();
   const router = useRouter();
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
-  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
   const isLoginPage = pathname === '/admin/login';
 
-  // Show a loader while Firebase resolves the auth state.
-  if (isUserLoading) {
+  useEffect(() => {
+    if (!user) {
+      setIsAdmin(null);
+      return;
+    }
+    user.getIdTokenResult().then(result => {
+      setIsAdmin(result.claims['admin'] === true);
+    });
+  }, [user]);
+
+  // Show a loader while Firebase resolves auth state or while fetching the token claim.
+  if (isUserLoading || (user && isAdmin === null && !isLoginPage)) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -61,9 +71,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     return null;
   }
 
-  const isAdmin = adminEmail ? user?.email === adminEmail : !!user;
   const showHeader = isAdmin && !isLoginPage;
-  
+
   return (
     <div className="min-h-screen bg-background">
       {showHeader && <AdminHeader />}

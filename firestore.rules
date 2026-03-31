@@ -23,6 +23,10 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
     function isValidEmail(email) {
       return email is string && email.matches('^[^@]+@[^@]+\\.[^@]+$');
     }
@@ -98,7 +102,7 @@ service cloud.firestore {
      */
     match /testimonials/{testimonialId} {
       allow list, delete: if false;
-      allow get, update: if isAuthenticated();
+      allow get, update: if isAdmin();
       allow create: if
         request.resource.data.keys().hasOnly([
           'name', 'license', 'quote', 'submissionDate', 'approved'
@@ -120,7 +124,7 @@ service cloud.firestore {
      */
     match /blogPosts/{postId} {
       allow get, list: if true;
-      allow create, update, delete: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
     }
   }
 }
