@@ -4,6 +4,7 @@
 import { useUser } from '@/firebase';
 import { usePathname, useRouter } from 'next/navigation';
 import { ReactNode, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/firebase';
 import { Loader2 } from 'lucide-react';
@@ -11,6 +12,7 @@ import { Loader2 } from 'lucide-react';
 function AdminHeader() {
   const auth = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleSignOut = async () => {
     if (auth) {
@@ -22,7 +24,23 @@ function AdminHeader() {
 
   return (
     <header className="bg-card border-b p-4 flex justify-between items-center">
-      <h1 className="text-xl font-bold">Admin Dashboard</h1>
+      <div className="flex items-center gap-6">
+        <h1 className="text-xl font-bold">Admin</h1>
+        <nav className="flex gap-4 text-sm">
+          <Link
+            href="/admin"
+            className={pathname === '/admin' ? 'font-semibold underline underline-offset-4' : 'text-muted-foreground hover:text-foreground'}
+          >
+            Blog Posts
+          </Link>
+          <Link
+            href="/admin/bookings"
+            className={pathname.startsWith('/admin/bookings') ? 'font-semibold underline underline-offset-4' : 'text-muted-foreground hover:text-foreground'}
+          >
+            Bookings
+          </Link>
+        </nav>
+      </div>
       <Button onClick={handleSignOut} variant="outline">Sign Out</Button>
     </header>
   );

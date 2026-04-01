@@ -41,10 +41,14 @@ service cloud.firestore {
 
     /**
      * @path /bookings/{bookingId}
-     * Public create with field validation. No reads or mutations allowed.
+     * Public create with field validation. Admin can read, delete, and update status only.
      */
     match /bookings/{bookingId} {
-      allow get, list, update, delete: if false;
+      allow get, list: if isAdmin();
+      allow delete: if isAdmin();
+      allow update: if isAdmin() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
+        request.resource.data.status in ['pending', 'confirmed', 'cancelled'];
       allow create: if
         request.resource.data.keys().hasOnly([
           'fullName', 'phone', 'email', 'licenseType',
