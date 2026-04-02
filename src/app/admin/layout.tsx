@@ -3,7 +3,8 @@
 
 import { useUser } from '@/firebase';
 import { usePathname, useRouter } from 'next/navigation';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/firebase';
 import { Loader2 } from 'lucide-react';
@@ -11,6 +12,7 @@ import { Loader2 } from 'lucide-react';
 function AdminHeader() {
   const auth = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleSignOut = async () => {
     if (auth) {
@@ -22,7 +24,23 @@ function AdminHeader() {
 
   return (
     <header className="bg-card border-b p-4 flex justify-between items-center">
-      <h1 className="text-xl font-bold">Admin Dashboard</h1>
+      <div className="flex items-center gap-6">
+        <h1 className="text-xl font-bold">Admin</h1>
+        <nav className="flex gap-4 text-sm">
+          <Link
+            href="/admin"
+            className={pathname === '/admin' ? 'font-semibold underline underline-offset-4' : 'text-muted-foreground hover:text-foreground'}
+          >
+            Blog Posts
+          </Link>
+          <Link
+            href="/admin/bookings"
+            className={pathname.startsWith('/admin/bookings') ? 'font-semibold underline underline-offset-4' : 'text-muted-foreground hover:text-foreground'}
+          >
+            Bookings
+          </Link>
+        </nav>
+      </div>
       <Button onClick={handleSignOut} variant="outline">Sign Out</Button>
     </header>
   );
@@ -32,12 +50,22 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const { user, isUserLoading } = useUser();
   const pathname = usePathname();
   const router = useRouter();
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
-  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
   const isLoginPage = pathname === '/admin/login';
 
-  // Show a loader while Firebase resolves the auth state.
-  if (isUserLoading) {
+  useEffect(() => {
+    if (!user) {
+      setIsAdmin(null);
+      return;
+    }
+    user.getIdTokenResult().then(result => {
+      setIsAdmin(result.claims['admin'] === true);
+    });
+  }, [user]);
+
+  // Show a loader while Firebase resolves auth state or while fetching the token claim.
+  if (isUserLoading || (user && isAdmin === null && !isLoginPage)) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -61,9 +89,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     return null;
   }
 
-  const isAdmin = adminEmail ? user?.email === adminEmail : !!user;
   const showHeader = isAdmin && !isLoginPage;
-  
+
   return (
     <div className="min-h-screen bg-background">
       {showHeader && <AdminHeader />}

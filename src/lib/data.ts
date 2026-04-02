@@ -110,6 +110,21 @@ export const testimonials = [
   },
 ];
 
+export type BookingStatus = 'pending' | 'confirmed' | 'cancelled';
+
+export interface Booking {
+  id?: string;
+  serviceCategory: 'driving' | 'vehicle';
+  fullName: string;
+  phone: string;
+  email: string;
+  licenseType: string;
+  preferredDate: string;
+  preferredTime: 'morning' | 'afternoon' | 'late-afternoon';
+  bookingDate: string;
+  status?: BookingStatus;
+}
+
 export interface BlogPost {
   id?: string;
   title: string;
