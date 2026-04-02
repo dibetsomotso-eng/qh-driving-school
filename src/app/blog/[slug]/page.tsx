@@ -9,12 +9,12 @@ import ReactMarkdown from 'react-markdown';
 import { useMemoFirebase } from '@/firebase/provider';
 import { useFirestore } from '@/firebase';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { type BlogPost } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export default function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
   const firestore = useFirestore();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
