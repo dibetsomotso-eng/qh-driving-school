@@ -2,7 +2,23 @@
 # https://firebase.google.com/docs/app-hosting/configure
 
 runConfig:
-  # Increase this value if you'd like to automatically spin up
-  # more instances in response to increased traffic.
   minInstances: 1
   maxInstances: 5
+
+env:
+  - variable: ADMIN_EMAILS
+    value: "dibetsomotso@gmail.com"
+    availability:
+      - RUNTIME
+  - variable: FROM_EMAIL
+    value: "dibetsomotso@gmail.com"
+    availability:
+      - RUNTIME
+  - variable: BUSINESS_NAME
+    value: "QH Driving School"
+    availability:
+      - RUNTIME
+  - variable: SENDGRID_API_KEY
+    secret: sendgrid-api-key
+    availability:
+      - RUNTIME
