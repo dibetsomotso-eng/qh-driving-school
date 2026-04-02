@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Toaster } from '@/components/ui/toaster';
-import { SiteChrome } from '@/components/layout/site-chrome';
+import { SiteChromeHeader, SiteChromeFooter } from '@/components/layout/site-chrome';
 import { ThemeProvider } from '@/components/theme-provider';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import './globals.css';
@@ -32,8 +32,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <SiteChrome />
+            <SiteChromeHeader />
             <main>{children}</main>
+            <SiteChromeFooter />
             <Toaster />
           </ThemeProvider>
         </FirebaseClientProvider>
