@@ -15,15 +15,16 @@ export async function generateStaticParams() {
   }));
 }
 
-export default function ServiceDetailPage({ params }: { params: { slug: string } }) {
-  const service = allServices.find((s) => s.slug === params.slug);
+export default async function ServiceDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const service = allServices.find((s) => s.slug === slug);
 
   if (!service) {
     notFound();
   }
 
   const serviceImage = PlaceHolderImages.find((img) => img.id === service.imageId);
-  const isVehicleService = vehicleServices.some((s) => s.slug === params.slug);
+  const isVehicleService = vehicleServices.some((s) => s.slug === slug);
   const backHref = isVehicleService ? '/services/vehicle' : '/services';
   const backLabel = isVehicleService ? 'Vehicle Services' : 'Driving Services';
 
