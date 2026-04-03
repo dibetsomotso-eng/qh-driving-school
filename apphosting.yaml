@@ -10,6 +10,10 @@ env:
     value: "dibetsomotso@gmail.com"
     availability:
       - RUNTIME
+  - variable: ADMIN_EMAIL_TEMP
+    value: "dibetsomotso@gmail.com"
+    availability:
+      - RUNTIME
   - variable: FROM_EMAIL
     value: "dibetsomotso@gmail.com"
     availability:
