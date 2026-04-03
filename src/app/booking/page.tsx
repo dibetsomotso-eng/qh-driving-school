@@ -205,18 +205,19 @@ export default function BookingPage() {
       return;
     }
 
-    try {
-      await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          notificationType: "booking",
-          data: { ...bookingData, bookingId: docRef.id },
-        }),
-      });
-    } catch {
-      // Booking saved — email failure is non-blocking
-    }
+    await fetch('/api/send-booking-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fullName: data.fullName,
+        email: data.email,
+        phone: data.phone,
+        serviceCategory: data.serviceCategory,
+        licenseType: data.licenseType,
+        preferredDate: data.preferredDate,
+        preferredTime: data.preferredTime,
+      }),
+    });
 
     setIsSuccess(true);
     setIsSubmitting(false);

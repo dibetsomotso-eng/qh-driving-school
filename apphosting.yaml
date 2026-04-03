@@ -18,7 +18,7 @@ env:
     value: "QH Driving School"
     availability:
       - RUNTIME
-  - variable: SENDGRID_API_KEY
-    secret: sendgrid-api-key
+  - variable: RESEND_API_KEY
+    secret: resend-api-key
     availability:
       - RUNTIME

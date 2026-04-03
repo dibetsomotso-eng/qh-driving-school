@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
-import sgMail from '@sendgrid/mail';
+import { Resend } from 'resend';
 
-if (process.env.SENDGRID_API_KEY) {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-}
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const ALLOWED_NOTIFICATION_TYPES = ['booking', 'contact', 'newsletter'] as const;
 type NotificationType = typeof ALLOWED_NOTIFICATION_TYPES[number];
@@ -20,8 +18,8 @@ function escapeHtml(value: unknown): string {
 }
 
 export async function POST(request: Request) {
-  if (!process.env.SENDGRID_API_KEY) {
-    console.error('SendGrid API key is missing from environment variables.');
+  if (!process.env.RESEND_API_KEY) {
+    console.error('Resend API key is missing from environment variables.');
     return NextResponse.json(
       { success: false, message: 'Email service is not configured.' },
       { status: 500 }
@@ -68,36 +66,42 @@ export async function POST(request: Request) {
 
   const type = notificationType as NotificationType;
   const adminEmails = adminEmailsEnv.split(',').map((e) => e.trim());
-  const fromEmail = process.env.FROM_EMAIL || 'noreply@qhdrivingschool.co.za';
+  const fromEmail = process.env.FROM_EMAIL || 'onboarding@resend.dev';
   const businessName = process.env.BUSINESS_NAME || 'QH Driving School';
 
   try {
     const promises: Promise<unknown>[] = [];
 
     if (type === 'booking') {
-      const { adminEmail, customerEmail } = getBookingEmailTemplates(
+      const { adminPayload, customerPayload } = getBookingEmailPayloads(
         data as Record<string, unknown>,
         adminEmails,
         fromEmail,
         businessName
       );
-      promises.push(sgMail.send(adminEmail), sgMail.send(customerEmail));
+      promises.push(
+        resend.emails.send(adminPayload),
+        resend.emails.send(customerPayload)
+      );
     } else if (type === 'contact') {
-      const adminEmail = getContactEmailTemplate(
+      const adminPayload = getContactEmailPayload(
         data as Record<string, unknown>,
         adminEmails,
         fromEmail,
         businessName
       );
-      promises.push(sgMail.send(adminEmail));
+      promises.push(resend.emails.send(adminPayload));
     } else if (type === 'newsletter') {
-      const { adminEmail, customerEmail } = getNewsletterEmailTemplates(
+      const { adminPayload, customerPayload } = getNewsletterEmailPayloads(
         data as Record<string, unknown>,
         adminEmails,
         fromEmail,
         businessName
       );
-      promises.push(sgMail.send(adminEmail), sgMail.send(customerEmail));
+      promises.push(
+        resend.emails.send(adminPayload),
+        resend.emails.send(customerPayload)
+      );
     }
 
     const results = await Promise.allSettled(promises);
@@ -133,7 +137,6 @@ const formatLicenseType = (type: unknown): string => {
     'code-a': 'Code A (Motorcycle) Driving Lesson',
     'code-c1': 'Code C1 (Medium Truck) Driving Lesson',
     renewal: 'License Renewal Assistance',
-    // Vehicle services
     'car-registration': 'Car Registration & Licensing',
     'number-plates': 'Number Plates',
     'disk-renewal': 'Disk Renewal',
@@ -158,10 +161,10 @@ const formatTimeSlot = (time: unknown): string => {
 };
 
 // ---------------------------------------------------------------------------
-// Email templates
+// Email payloads
 // ---------------------------------------------------------------------------
 
-function getBookingEmailTemplates(
+function getBookingEmailPayloads(
   booking: Record<string, unknown>,
   adminEmails: string[],
   fromEmail: string,
@@ -182,9 +185,9 @@ function getBookingEmailTemplates(
     : '';
   const safeBusinessName = escapeHtml(businessName);
 
-  const adminEmail = {
+  const adminPayload = {
+    from: `${safeBusinessName} <${fromEmail}>`,
     to: adminEmails,
-    from: fromEmail,
     subject: `New Booking Request - ${fullName}`,
     html: `<!DOCTYPE html>
 <html>
@@ -218,9 +221,9 @@ function getBookingEmailTemplates(
 </html>`,
   };
 
-  const customerEmail = {
-    to: String(booking.email),
-    from: fromEmail,
+  const customerPayload = {
+    from: `${safeBusinessName} <${fromEmail}>`,
+    to: [String(booking.email)],
     subject: `Booking Request Received - ${safeBusinessName}`,
     html: `<!DOCTYPE html>
 <html>
@@ -250,10 +253,10 @@ function getBookingEmailTemplates(
 </html>`,
   };
 
-  return { adminEmail, customerEmail };
+  return { adminPayload, customerPayload };
 }
 
-function getContactEmailTemplate(
+function getContactEmailPayload(
   contact: Record<string, unknown>,
   adminEmails: string[],
   fromEmail: string,
@@ -269,8 +272,8 @@ function getContactEmailTemplate(
   const safeBusinessName = escapeHtml(businessName);
 
   return {
+    from: `${safeBusinessName} <${fromEmail}>`,
     to: adminEmails,
-    from: fromEmail,
     replyTo: String(contact.email),
     subject: `New Contact Form - ${fullName}`,
     html: `<!DOCTYPE html>
@@ -295,7 +298,7 @@ function getContactEmailTemplate(
   };
 }
 
-function getNewsletterEmailTemplates(
+function getNewsletterEmailPayloads(
   subscriber: Record<string, unknown>,
   adminEmails: string[],
   fromEmail: string,
@@ -307,9 +310,9 @@ function getNewsletterEmailTemplates(
     : '';
   const safeBusinessName = escapeHtml(businessName);
 
-  const customerEmail = {
-    to: String(subscriber.email),
-    from: fromEmail,
+  const customerPayload = {
+    from: `${safeBusinessName} <${fromEmail}>`,
+    to: [String(subscriber.email)],
     subject: `Welcome to ${safeBusinessName}!`,
     html: `<!DOCTYPE html>
 <html>
@@ -324,12 +327,12 @@ function getNewsletterEmailTemplates(
 </html>`,
   };
 
-  const adminEmail = {
+  const adminPayload = {
+    from: `${safeBusinessName} <${fromEmail}>`,
     to: adminEmails,
-    from: fromEmail,
     subject: 'New Newsletter Subscriber',
     html: `<p>New subscriber: <strong>${email}</strong></p><p>Subscribed: ${subscriptionDate}</p>`,
   };
 
-  return { adminEmail, customerEmail };
+  return { adminPayload, customerPayload };
 }

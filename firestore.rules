@@ -126,5 +126,20 @@ service cloud.firestore {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
     }
+
+    /**
+     * @path /mail/{mailId}
+     * Public creates so booking/contact forms can queue emails via the
+     * "Trigger Email from Firestore" extension. The extension's Admin SDK
+     * writes (delivery status updates) bypass these rules.
+     */
+    match /mail/{mailId} {
+      allow get, list, update, delete: if false;
+      allow create: if
+        request.resource.data.keys().hasOnly(['to', 'message']) &&
+        request.resource.data.to is list &&
+        request.resource.data.message is map &&
+        request.resource.data.message.subject is string;
+    }
   }
 }
