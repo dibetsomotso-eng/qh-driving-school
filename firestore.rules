@@ -141,5 +141,19 @@ service cloud.firestore {
         request.resource.data.message is map &&
         request.resource.data.message.subject is string;
     }
+
+    /**
+     * CMS Collections
+     * Public reads for the website, Admin writes for management.
+     */
+    match /services/{id} {
+      allow read, write: if true;
+    }
+    match /regulatory_info/{id} {
+      allow read, write: if true;
+    }
+    match /location/{id} {
+      allow read, write: if true;
+    }
   }
 }
