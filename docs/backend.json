@@ -1,0 +1,229 @@
+{
+  "entities": {
+    "Booking": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Booking",
+      "type": "object",
+      "description": "Represents a booking for a driving lesson.",
+      "properties": {
+        "fullName": {
+          "type": "string",
+          "description": "Full name of the person making the booking."
+        },
+        "phone": {
+          "type": "string",
+          "description": "Phone number of the person making the booking."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the person making the booking.",
+          "format": "email"
+        },
+        "licenseType": {
+          "type": "string",
+          "description": "The type of license the person is interested in (e.g., Code A, B, EB, C1, EC)."
+        },
+        "preferredDate": {
+          "type": "string",
+          "description": "The user's preferred date for the lesson."
+        },
+        "preferredTime": {
+          "type": "string",
+          "description": "The user's preferred time slot for the lesson."
+        },
+        "bookingDate": {
+          "type": "string",
+          "description": "The date and time the booking was made.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "fullName",
+        "phone",
+        "email",
+        "licenseType",
+        "preferredDate",
+        "preferredTime",
+        "bookingDate"
+      ]
+    },
+    "ContactSubmission": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Contact Submission",
+      "type": "object",
+      "description": "Represents a contact form submission.",
+      "properties": {
+        "fullName": {
+          "type": "string",
+          "description": "Full name of the person."
+        },
+        "phone": {
+          "type": "string",
+          "description": "Phone number of the person."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the person.",
+          "format": "email"
+        },
+        "licenseType": {
+          "type": "string",
+          "description": "The license type the person is interested in."
+        },
+        "message": {
+          "type": "string",
+          "description": "The message from the person."
+        },
+        "submissionDate": {
+          "type": "string",
+          "description": "The date and time the submission was made.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "fullName",
+        "phone",
+        "email",
+        "licenseType",
+        "message",
+        "submissionDate"
+      ]
+    },
+    "Testimonial": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Testimonial",
+      "type": "object",
+      "description": "Represents a testimonial from a student.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the testimonial."
+        },
+        "authorName": {
+          "type": "string",
+          "description": "Name of the author of the testimonial."
+        },
+        "testimonialText": {
+          "type": "string",
+          "description": "Text content of the testimonial."
+        },
+        "submissionDate": {
+          "type": "string",
+          "description": "The date and time the testimonial was submitted.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "authorName",
+        "testimonialText",
+        "submissionDate"
+      ]
+    },
+    "Subscriber": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Subscriber",
+      "type": "object",
+      "description": "Represents a subscriber to the newsletter.",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Email address of the subscriber.",
+          "format": "email"
+        },
+        "subscriptionDate": {
+          "type": "string",
+          "description": "The date and time the subscriber subscribed.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "email",
+        "subscriptionDate"
+      ]
+    },
+    "BlogPost": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Blog Post",
+      "type": "object",
+      "description": "Represents a blog post in the application.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The title of the blog post."
+        },
+        "slug": {
+          "type": "string",
+          "description": "A URL-friendly version of the title."
+        },
+        "content": {
+          "type": "string",
+          "description": "The full content of the blog post, likely in Markdown format."
+        },
+        "excerpt": {
+          "type": "string",
+          "description": "A short summary of the blog post."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL for the blog post's cover image."
+        },
+        "imageHint": {
+          "type": "string",
+          "description": "Hint for AI image generation."
+        },
+        "publishedAt": {
+          "type": "string",
+          "description": "The date and time the post was published.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "title",
+        "slug",
+        "content",
+        "excerpt",
+        "imageUrl",
+        "publishedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "/bookings/{bookingId}": {
+      "schema": {
+        "$ref": "#/entities/Booking"
+      },
+      "description": "Stores booking submissions made through the website."
+    },
+    "/contactSubmissions/{contactId}": {
+      "schema": {
+        "$ref": "#/entities/ContactSubmission"
+      },
+      "description": "Stores contact form submissions from the website."
+    },
+    "/subscribers/{subscriberId}": {
+      "schema": {
+        "$ref": "#/entities/Subscriber"
+      },
+      "description": "Stores newsletter subscription data."
+    },
+    "/testimonials/{testimonialId}": {
+      "schema": {
+        "$ref": "#/entities/Testimonial"
+      },
+      "description": "Stores testimonial submissions from students."
+    },
+    "/blogPosts/{postId}": {
+      "schema": {
+        "$ref": "#/entities/BlogPost"
+      },
+      "description": "Stores the blog posts for the website."
+    }
+  }
+}

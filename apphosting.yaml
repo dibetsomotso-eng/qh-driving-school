@@ -1,0 +1,28 @@
+# Settings to manage and configure a Firebase App Hosting backend.
+# https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  minInstances: 1
+  maxInstances: 5
+
+env:
+  - variable: ADMIN_EMAILS
+    value: "dibetsomotso@gmail.com"
+    availability:
+      - RUNTIME
+  - variable: ADMIN_EMAIL_TEMP
+    value: "dibetsomotso@gmail.com"
+    availability:
+      - RUNTIME
+  - variable: FROM_EMAIL
+    value: "noreply@qhdrivingschool.co.za"
+    availability:
+      - RUNTIME
+  - variable: BUSINESS_NAME
+    value: "QH Driving School"
+    availability:
+      - RUNTIME
+  - variable: RESEND_API_KEY
+    secret: resend-api-key
+    availability:
+      - RUNTIME

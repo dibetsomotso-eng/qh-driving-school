@@ -1,0 +1,208 @@
+{
+  "placeholderImages": [
+    {
+      "id": "home-hero",
+      "description": "A learner driver focused on the road, seen from the passenger seat.",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Hero%20Images%2FHero%20Image%20QH.jpg?alt=media",
+      "imageHint": "learner driver"
+    },
+    {
+      "id": "about-founder",
+      "description": "Portrait of Henry Qoli Mtebula, founder of QH Driving School.",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/About%20Us%20Page%2FMeet%20Our%20Founder_Henry%20Qoli%20Mtebula.jpg?alt=media",
+      "imageHint": "professional man"
+    },
+    {
+      "id": "about-instructors",
+      "description": "A group of friendly driving instructors standing together.",
+      "imageUrl": "https://images.unsplash.com/photo-1619662413798-367880946883?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8ZHJpdmluZyUyMGluc3RydWN0b3JzfGVufDB8fHx8MTc1OTc3NTUzNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "driving instructors"
+    },
+    {
+      "id": "about-students",
+      "description": "A diverse group of happy students holding their new driver's licenses.",
+      "imageUrl": "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxoYXBweSUyMHN0dWRlbnRzfGVufDB8fHx8MTc1OTc0Nzk0N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "happy students"
+    },
+    {
+      "id": "service-online-booking",
+      "description": "A person booking a lesson on a laptop.",
+      "imageUrl": "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxvbmxpbmUlMjBib29raW5nfGVufDB8fHx8MTc1OTc3NTUzNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "online booking"
+    },
+    {
+      "id": "service-renewals",
+      "description": "Close up of a driver's license card.",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Our%20Services%2FDriver's%20License%20Renewals.jpeg?alt=media",
+      "imageHint": "license card"
+    },
+    {
+      "id": "service-code-ab-eb",
+      "description": "A person riding a motorcycle on an open road.",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Our%20Services%2FCode%20A%2C%20B%20%26%20EB%20image.jpg?alt=media",
+      "imageHint": "motorcycle driving"
+    },
+    {
+      "id": "service-code-c1-ec",
+      "description": "A medium-sized truck driving on a highway.",
+      "imageUrl": "https://images.unsplash.com/photo-1485575301924-6891ef935dcd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx0cnVjayUyMGRyaXZpbmd8ZW58MHx8fHwxNzU5Nzc1NTM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "truck driving"
+    },
+    {
+      "id": "service-prdp",
+      "description": "A professional driver in a passenger vehicle.",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Our%20Services%2FBooking%20of%20PrDP.jpg?alt=media",
+      "imageHint": "professional driver"
+    },
+    {
+      "id": "service-learners-drivers",
+      "description": "An instructor pointing at a road sign to a student.",
+      "imageUrl": "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkcml2aW5nJTIwbGVzc29ufGVufDB8fHx8MTc1OTcwMzExMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "driving lesson"
+    },
+    {
+      "id": "service-card-issuing",
+      "description": "Assistance in the final step: collecting your new license card.",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Our%20Services%2FCard%20Issuing.webp?alt=media",
+      "imageHint": "new license"
+    },
+    {
+      "id": "service-guaranteed-pass",
+      "description": "A student smiling and giving a thumbs up after passing their test.",
+      "imageUrl": "https://images.unsplash.com/photo-1614492898637-435e0f87cef8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwYXNzaW5nJTIwdGVzdHxlbnwwfHx8fDE3NTk3NzU1MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "passing test"
+    },
+    {
+      "id": "blog-1",
+      "description": "A car's dashboard with a focus on the steering wheel and road ahead.",
+      "imageUrl": "https://images.unsplash.com/photo-1629015346993-2c1aa5d94cb3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkcml2aW5nJTIwdmlld3xlbnwwfHx8fDE3NTk3NzU1MzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "driving view"
+    },
+    {
+      "id": "blog-2",
+      "description": "A parallel parking maneuver shown from a top-down angle.",
+      "imageUrl": "https://images.unsplash.com/photo-1648573688136-de51ced7aa0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwYXJhbGxlbCUyMHBhcmtpbmcnZXx8MHx8fHwxNzU5Nzc1NTM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "parallel parking"
+    },
+    {
+      "id": "blog-3",
+      "description": "A road with multiple traffic signs.",
+      "imageUrl": "https://images.unsplash.com/photo-1572670014853-1d3a3f22b40f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyb2FkJTIwc2lnbnN8ZW58MHx8fHwxNzU5NjcyNDUzfDA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageHint": "road signs"
+    },
+    {
+      "id": "gallery-1",
+      "description": "Happy student holding a driver's license.",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Gallery%2FHappy%20Student%201.jpg?alt=media",
+      "imageHint": "happy driver"
+    },
+    {
+      "id": "gallery-2",
+      "description": "Another happy student holding their license.",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Gallery%2FHappy%20Student%202.jpg?alt=media",
+      "imageHint": "happy student"
+    },
+    {
+      "id": "gallery-3",
+      "description": "QH Driving School branded car.",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Gallery%2FQH%20Driving%20School%20branded%20car.jpg?alt=media",
+      "imageHint": "branded car"
+    },
+    {
+      "id": "gallery-4",
+      "description": "Another happy student with their license.",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Gallery%2FHappy%20Student%204.jpg?alt=media",
+      "imageHint": "happy student"
+    },
+    {
+      "id": "gallery-5",
+      "description": "A QH branded motor bike.",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Gallery%2FQH%20Branded%20Motor%20Bike.jpg?alt=media",
+      "imageHint": "branded motorbike"
+    },
+    {
+      "id": "gallery-6",
+      "description": "Student receiving a certificate of completion.",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Gallery%2FHappy%20Student%209.jpg?alt=media",
+      "imageHint": "driving certificate"
+    },
+    {
+      "id": "gallery-7",
+      "description": "Student receiving a certificate of completion.",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859832776-8df84.firebasestorage.app/o/Gallery%2FHappy%20Student%208.jpg?alt=media",
+      "imageHint": "student group"
+    },
+    {
+      "id": "gallery-8",
+      "description": "Student receiving a certificate of completion.",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/studio-3859332776-8df84.firebasestorage.app/o/Gallery%2FHappy%20Student%206.jpg?alt=media",
+      "imageHint": "happy student"
+    },
+    {
+      "id": "service-car-registration",
+      "description": "A vehicle registration document and car keys on a desk.",
+      "imageUrl": "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "car registration"
+    },
+    {
+      "id": "service-number-plates",
+      "description": "A South African vehicle number plate close-up.",
+      "imageUrl": "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "number plate"
+    },
+    {
+      "id": "service-disk-renewal",
+      "description": "A vehicle license disk displayed on a windscreen.",
+      "imageUrl": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "license disk"
+    },
+    {
+      "id": "service-police-clearance",
+      "description": "An official South African Police Service building.",
+      "imageUrl": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "police clearance"
+    },
+    {
+      "id": "service-export-clearance",
+      "description": "A car being loaded onto a shipping container at a port.",
+      "imageUrl": "https://images.unsplash.com/photo-1578575437130-527eed3abbec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "car export"
+    },
+    {
+      "id": "service-vin-update",
+      "description": "A close-up of a vehicle identification number plate on a dashboard.",
+      "imageUrl": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "vehicle identification"
+    },
+    {
+      "id": "service-roadworthy",
+      "description": "A mechanic inspecting the undercarriage of a vehicle on a lift.",
+      "imageUrl": "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "vehicle inspection"
+    },
+    {
+      "id": "service-duplicates",
+      "description": "Official documents and a pen on a desk.",
+      "imageUrl": "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "official documents"
+    },
+    {
+      "id": "service-microdots",
+      "description": "A magnifying glass showing microscopic dots on a surface.",
+      "imageUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "microdot security"
+    },
+    {
+      "id": "service-vintage",
+      "description": "A beautifully restored classic vintage car at a show.",
+      "imageUrl": "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "imageHint": "vintage car"
+    },
+    {
+      "id": "contact-map",
+      "description": "A map showing the location of QH Driving School in Roodepoort.",
+      "imageUrl": "https://images.unsplash.com/photo-1717700299581-c2fc3fad4ee8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjaXR5JTIwbWFwfGVufDB8fHx8MTc1OTcxNjc0M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "city map"
+    }
+  ]
+}

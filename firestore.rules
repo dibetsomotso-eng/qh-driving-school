@@ -1,0 +1,145 @@
+/**
+ * @fileoverview Firestore Security Rules for QH Driving School.
+ *
+ * Core Philosophy:
+ * - Public forms (bookings, contact, subscribers, testimonials) allow unauthenticated creates
+ *   with strict field-level validation to prevent spam/injection.
+ * - Blog posts require authentication (admin only) for all writes.
+ * - Reads are blocked for all collections (admin reads via Firebase Admin SDK server-side).
+ *
+ * Collections:
+ * - /bookings              — Public booking submissions
+ * - /contactSubmissions    — Public contact form submissions
+ * - /subscribers           — Public newsletter subscriptions
+ * - /testimonials          — Public testimonial submissions (require admin approval to display)
+ * - /blogPosts             — Admin-only blog post management
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helpers
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches('^[^@]+@[^@]+\\.[^@]+$');
+    }
+
+    function isNonEmptyString(s) {
+      return s is string && s.size() > 0 && s.size() <= 1000;
+    }
+
+    function isShortString(s) {
+      return s is string && s.size() > 0 && s.size() <= 100;
+    }
+
+    /**
+     * @path /bookings/{bookingId}
+     * Public create with field validation. Admin can read, delete, and update status only.
+     */
+    match /bookings/{bookingId} {
+      allow get, list: if isAdmin();
+      allow delete: if isAdmin();
+      allow update: if isAdmin() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
+        request.resource.data.status in ['pending', 'confirmed', 'cancelled'];
+      allow create: if
+        request.resource.data.keys().hasOnly([
+          'fullName', 'phone', 'email', 'licenseType',
+          'preferredDate', 'preferredTime', 'bookingDate', 'serviceCategory'
+        ]) &&
+        isShortString(request.resource.data.fullName) &&
+        isShortString(request.resource.data.phone) &&
+        isValidEmail(request.resource.data.email) &&
+        isShortString(request.resource.data.licenseType) &&
+        isShortString(request.resource.data.preferredDate) &&
+        isShortString(request.resource.data.preferredTime) &&
+        request.resource.data.bookingDate is string &&
+        (
+          !('serviceCategory' in request.resource.data) ||
+          request.resource.data.serviceCategory in ['driving', 'vehicle']
+        );
+    }
+
+    /**
+     * @path /contactSubmissions/{contactId}
+     * Public create with field validation. No reads or mutations allowed.
+     */
+    match /contactSubmissions/{contactId} {
+      allow get, list, update, delete: if false;
+      allow create: if
+        request.resource.data.keys().hasOnly([
+          'fullName', 'email', 'phone', 'message', 'submissionDate'
+        ]) &&
+        isShortString(request.resource.data.fullName) &&
+        isValidEmail(request.resource.data.email) &&
+        isNonEmptyString(request.resource.data.message) &&
+        request.resource.data.message.size() <= 2000 &&
+        request.resource.data.submissionDate is string &&
+        (
+          !('phone' in request.resource.data) ||
+          request.resource.data.phone is string
+        );
+    }
+
+    /**
+     * @path /subscribers/{subscriberId}
+     * Public create (email only). No reads or mutations allowed.
+     */
+    match /subscribers/{subscriberId} {
+      allow get, list, update, delete: if false;
+      allow create: if
+        request.resource.data.keys().hasOnly(['email', 'subscriptionDate']) &&
+        isValidEmail(request.resource.data.email) &&
+        request.resource.data.subscriptionDate is string;
+    }
+
+    /**
+     * @path /testimonials/{testimonialId}
+     * Public create with field validation. Admin can read/update (to approve).
+     */
+    match /testimonials/{testimonialId} {
+      allow list, delete: if false;
+      allow get, update: if isAdmin();
+      allow create: if
+        request.resource.data.keys().hasOnly([
+          'name', 'license', 'quote', 'submissionDate', 'approved'
+        ]) &&
+        isShortString(request.resource.data.name) &&
+        isShortString(request.resource.data.license) &&
+        isNonEmptyString(request.resource.data.quote) &&
+        request.resource.data.quote.size() <= 500 &&
+        request.resource.data.submissionDate is string &&
+        (
+          !('approved' in request.resource.data) ||
+          request.resource.data.approved == false
+        );
+    }
+
+    /**
+     * @path /blogPosts/{postId}
+     * Authenticated admin writes. Public reads (get + list) so the blog pages work.
+     */
+    match /blogPosts/{postId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @path /mail/{mailId}
+     * Public creates so booking/contact forms can queue emails via the
+     * "Trigger Email from Firestore" extension. The extension's Admin SDK
+     * writes (delivery status updates) bypass these rules.
+     */
+    match /mail/{mailId} {
+      allow get, list, update, delete: if false;
+      allow create: if
+        request.resource.data.keys().hasOnly(['to', 'message']) &&
+        request.resource.data.to is list &&
+        request.resource.data.message is map &&
+        request.resource.data.message.subject is string;
+    }
+  }
+}
