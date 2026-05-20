@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import {
   SERVICE_CATEGORIES,
@@ -8,6 +8,10 @@ import {
   LOOSE_PHONE_REGEX,
   ISO_DATE_REGEX,
 } from '@/lib/validation';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
+
+// OWASP: 5 booking emails per 15 minutes per IP prevents spam via the booking form.
+const BOOKING_EMAIL_RATE_LIMIT = { windowMs: 15 * 60_000, max: 5 };
 
 const BodySchema = z.object({
   fullName:        z.string().trim().min(2).max(100),
@@ -29,7 +33,17 @@ function escapeHtml(value: unknown): string {
     .replace(/'/g, '&#039;');
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  // SECURITY: Rate-limit before any other processing.
+  const ip = getClientIp(req.headers);
+  const rl = checkRateLimit(`send-booking-email:${ip}`, BOOKING_EMAIL_RATE_LIMIT);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfterSec) } }
+    );
+  }
+
   if (!process.env.RESEND_API_KEY) {
     console.error('RESEND_API_KEY is not configured.');
     return NextResponse.json({ error: 'Email service not configured.' }, { status: 503 });
@@ -60,11 +74,13 @@ export async function POST(req: Request) {
     preferredTime,
   } = parsed.data;
 
-  const ADMIN_EMAIL = process.env.ADMIN_EMAIL_TEMP || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+  // SECURITY: Use server-only env vars for admin email. NEXT_PUBLIC_* vars are
+  // embedded in the client-side JS bundle and must never hold sensitive values.
+  const ADMIN_EMAIL = process.env.ADMIN_EMAIL || process.env.ADMIN_EMAILS?.split(',')[0]?.trim();
   const BUSINESS_NAME = escapeHtml(process.env.BUSINESS_NAME || 'QH Driving School');
 
   if (!ADMIN_EMAIL) {
-    console.error('ADMIN_EMAIL_TEMP / NEXT_PUBLIC_ADMIN_EMAIL is not configured.');
+    console.error('ADMIN_EMAIL / ADMIN_EMAILS is not configured.');
     return NextResponse.json({ error: 'Email service misconfigured.' }, { status: 503 });
   }
 

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { ZodError } from 'zod';
 import {
@@ -6,9 +6,14 @@ import {
   ContactDataSchema,
   NewsletterDataSchema,
 } from '@/lib/validation';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 const ALLOWED_NOTIFICATION_TYPES = ['booking', 'contact', 'newsletter'] as const;
 type NotificationType = typeof ALLOWED_NOTIFICATION_TYPES[number];
+
+// OWASP: Rate-limit email submissions to prevent spam and abuse via our domain.
+// 5 per 15 minutes per IP — enough for legitimate use, blocks automated flooding.
+const EMAIL_RATE_LIMIT = { windowMs: 15 * 60_000, max: 5 };
 
 /** Escape HTML entities to prevent XSS in email templates. */
 function escapeHtml(value: unknown): string {
@@ -21,8 +26,19 @@ function escapeHtml(value: unknown): string {
     .replace(/'/g, '&#039;');
 }
 
-export async function POST(request: Request) {
-  const resend = new Resend(process.env.RESEND_API_KEY);
+export async function POST(request: NextRequest) {
+  // SECURITY: Check rate limit before any other processing.
+  const ip = getClientIp(request.headers);
+  const rl = checkRateLimit(`send-email:${ip}`, EMAIL_RATE_LIMIT);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { success: false, message: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfterSec) } }
+    );
+  }
+
+  // SECURITY: Guard before constructing the client so we never pass undefined
+  // to the Resend constructor (which silently accepts it and fails at send-time).
   if (!process.env.RESEND_API_KEY) {
     console.error('Resend API key is missing from environment variables.');
     return NextResponse.json(
@@ -30,6 +46,7 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+  const resend = new Resend(process.env.RESEND_API_KEY);
 
   const adminEmailsEnv = process.env.ADMIN_EMAILS;
   if (!adminEmailsEnv) {
