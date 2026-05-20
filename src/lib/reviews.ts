@@ -17,26 +17,37 @@ export async function getReviews() {
   let googleReviews: Review[] = [];
   let googleStats = { totalRating: 5.0, totalReviews: 0 };
 
-  // 1. Fetch from Google
+  // 1. Fetch from Google Places API (New)
   if (GOOGLE_API_KEY && PLACE_ID) {
     try {
-      const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}&fields=reviews,rating,user_ratings_total&key=${GOOGLE_API_KEY}`;
-      const response = await fetch(url, { next: { revalidate: 21600 } });
+      const url = `https://places.googleapis.com/v1/places/${PLACE_ID}`;
+      const response = await fetch(url, {
+        headers: {
+          'X-Goog-Api-Key': GOOGLE_API_KEY,
+          'X-Goog-FieldMask': 'reviews,rating,userRatingCount',
+        },
+        next: { revalidate: 21600 },
+      });
       const data = await response.json();
 
-      if (data.status === 'OK') {
-        googleReviews = data.result.reviews.map((r: any) => ({
-          name: r.author_name,
+      if (data.reviews) {
+        googleReviews = data.reviews.map((r: {
+          authorAttribution: { displayName: string; photoUri?: string };
+          rating: number;
+          text?: { text: string };
+          publishTime: string;
+        }) => ({
+          name: r.authorAttribution.displayName,
           rating: r.rating,
-          quote: r.text,
-          license: "Google Review",
-          date: new Date(r.time * 1000).toISOString().split('T')[0],
-          source: "Google",
-          avatar: r.profile_photo_url
+          quote: r.text?.text ?? '',
+          license: 'Google Review',
+          date: new Date(r.publishTime).toISOString().split('T')[0],
+          source: 'Google',
+          avatar: r.authorAttribution.photoUri,
         }));
         googleStats = {
-          totalRating: data.result.rating,
-          totalReviews: data.result.user_ratings_total
+          totalRating: data.rating ?? 5.0,
+          totalReviews: data.userRatingCount ?? 0,
         };
       }
     } catch (error) {
@@ -61,7 +72,9 @@ export async function getReviews() {
     console.error('Error fetching Sanity testimonials:', error);
   }
 
-  // 3. Fallback to real reviews if everything else fails (to ensure authentic experience)
+  // 3. Combine and fallback to real reviews if everything else fails (to ensure authentic experience)
+  let allReviews: typeof googleReviews = [...googleReviews, ...sanityReviews];
+
   if (allReviews.length === 0) {
     allReviews = [
       {

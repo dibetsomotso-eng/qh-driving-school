@@ -1,25 +1,20 @@
-
 'use client';
 
-import { useUser } from '@/firebase';
+import { useUser, useInsForge } from '@/insforge/provider';
 import { usePathname, useRouter } from 'next/navigation';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/firebase';
 import { Loader2 } from 'lucide-react';
 
 function AdminHeader() {
-  const auth = useAuth();
+  const { signOut } = useInsForge();
   const router = useRouter();
   const pathname = usePathname();
 
   const handleSignOut = async () => {
-    if (auth) {
-      await auth.signOut();
-      // After sign-out, middleware will handle redirecting to the login page.
-      router.push('/admin/login');
-    }
+    await signOut();
+    router.push('/admin/login');
   };
 
   return (
@@ -29,19 +24,29 @@ function AdminHeader() {
         <nav className="flex gap-4 text-sm">
           <Link
             href="/admin"
-            className={pathname === '/admin' ? 'font-semibold underline underline-offset-4' : 'text-muted-foreground hover:text-foreground'}
+            className={
+              pathname === '/admin'
+                ? 'font-semibold underline underline-offset-4'
+                : 'text-muted-foreground hover:text-foreground'
+            }
           >
             Blog Posts
           </Link>
           <Link
             href="/admin/bookings"
-            className={pathname.startsWith('/admin/bookings') ? 'font-semibold underline underline-offset-4' : 'text-muted-foreground hover:text-foreground'}
+            className={
+              pathname.startsWith('/admin/bookings')
+                ? 'font-semibold underline underline-offset-4'
+                : 'text-muted-foreground hover:text-foreground'
+            }
           >
             Bookings
           </Link>
         </nav>
       </div>
-      <Button onClick={handleSignOut} variant="outline">Sign Out</Button>
+      <Button onClick={handleSignOut} variant="outline">
+        Sign Out
+      </Button>
     </header>
   );
 }
@@ -50,22 +55,19 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const { user, isUserLoading } = useUser();
   const pathname = usePathname();
   const router = useRouter();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   const isLoginPage = pathname === '/admin/login';
 
   useEffect(() => {
-    if (!user) {
-      setIsAdmin(null);
-      return;
+    if (!isUserLoading && !user && !isLoginPage) {
+      router.replace('/admin/login');
     }
-    user.getIdTokenResult().then(result => {
-      setIsAdmin(result.claims['admin'] === true);
-    });
-  }, [user]);
+    if (!isUserLoading && user && isLoginPage) {
+      router.replace('/admin');
+    }
+  }, [user, isUserLoading, isLoginPage, router]);
 
-  // Show a loader while Firebase resolves auth state or while fetching the token claim.
-  if (isUserLoading || (user && isAdmin === null && !isLoginPage)) {
+  if (isUserLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -73,9 +75,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  // Redirect unauthenticated users away from protected admin pages.
-  if (!isLoginPage && !user) {
-    router.replace('/admin/login');
+  // Show spinner while redirect is in flight
+  if (!user && !isLoginPage) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -83,18 +84,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  // Redirect authenticated admin away from the login page.
-  if (isLoginPage && user) {
-    router.replace('/admin');
-    return null;
-  }
-
-  const showHeader = isAdmin && !isLoginPage;
+  const showHeader = !!user && !isLoginPage;
 
   return (
     <div className="min-h-screen bg-background">
       {showHeader && <AdminHeader />}
-      <main className={showHeader ? "p-4 md:p-8" : ""}>{children}</main>
+      <main className={showHeader ? 'p-4 md:p-8' : ''}>{children}</main>
     </div>
   );
 }

@@ -5,7 +5,6 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { collection, addDoc } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
@@ -14,23 +13,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { navLinks } from "@/lib/data";
-import { useFirestore } from "@/firebase";
-import { errorEmitter } from "@/firebase/error-emitter";
-import { FirestorePermissionError } from "@/firebase/errors";
-
 
 const newsletterSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
+  email: z
+    .string()
+    .email({ message: "Please enter a valid email address." })
+    .max(254, { message: "Email address is too long." }),
 });
 
 type NewsletterFormValues = z.infer<typeof newsletterSchema>;
 
 const defaultValues: Partial<NewsletterFormValues> = {
-    email: "",
+  email: "",
 };
 
 export function Footer() {
-  const firestore = useFirestore();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -39,64 +36,28 @@ export function Footer() {
     defaultValues,
   });
 
-  const onSubmit = (data: NewsletterFormValues) => {
+  const onSubmit = async (data: NewsletterFormValues) => {
     setIsSubmitting(true);
-    if (!firestore) {
+    try {
+      const subscriberData = { ...data, subscriptionDate: new Date().toISOString() };
+      const res = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notificationType: 'newsletter', data: subscriberData }),
+      });
+      if (!res.ok) throw new Error('Subscribe failed');
+      toast({ title: "Subscribed!", description: "Thanks for joining our newsletter." });
+      form.reset();
+    } catch {
       toast({
         variant: "destructive",
         title: "Subscription Error",
-        description: "Firestore is not available. Please try again.",
+        description: "There was a problem with your subscription. Please try again.",
       });
+    } finally {
       setIsSubmitting(false);
-      return;
     }
-    
-    const subscriberData = {
-        ...data,
-        subscriptionDate: new Date().toISOString(),
-    };
-
-    addDoc(collection(firestore, "subscribers"), subscriberData)
-      .then((docRef) => {
-          toast({
-            title: "Subscribed!",
-            description: "Thanks for joining our newsletter.",
-          });
-          form.reset();
-
-          // Send notification email
-          fetch('/api/send-email', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              notificationType: 'newsletter',
-              data: subscriberData
-            }),
-          }).then(res => res.json()).then(response => {
-            if (!response.success) {
-              console.error("Email Error: Could not send newsletter confirmation email.");
-            }
-          }).catch(err => {
-              console.error("Fetch Error: Could not send newsletter confirmation email.", err);
-          });
-      })
-      .catch((error) => {
-          const permissionError = new FirestorePermissionError({
-            path: 'subscribers',
-            operation: 'create',
-            requestResourceData: subscriberData,
-          });
-          errorEmitter.emit('permission-error', permissionError);
-          toast({
-            variant: "destructive",
-            title: "Subscription Error",
-            description: "There was a problem with your subscription. Please try again.",
-          });
-      })
-      .finally(() => {
-          setIsSubmitting(false);
-      });
-  }
+  };
 
   return (
     <footer className="bg-accent text-accent-foreground">
@@ -121,7 +82,7 @@ export function Footer() {
               <p>
                 <a href="mailto:henrymteb@gmail.com" className="hover:text-primary transition-colors">henrymteb@gmail.com</a>
               </p>
-               <a
+              <a
                 href="https://wa.me/27733813197"
                 target="_blank"
                 rel="noopener noreferrer"

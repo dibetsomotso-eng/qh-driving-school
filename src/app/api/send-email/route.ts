@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { ZodError } from 'zod';
+import {
+  BookingDataSchema,
+  ContactDataSchema,
+  NewsletterDataSchema,
+} from '@/lib/validation';
 
 const ALLOWED_NOTIFICATION_TYPES = ['booking', 'contact', 'newsletter'] as const;
 type NotificationType = typeof ALLOWED_NOTIFICATION_TYPES[number];
@@ -68,12 +74,32 @@ export async function POST(request: Request) {
   const fromEmail = process.env.FROM_EMAIL || 'onboarding@resend.dev';
   const businessName = process.env.BUSINESS_NAME || 'QH Driving School';
 
+  // Validate the data payload with the schema for the given notification type.
+  const dataSchemaMap = {
+    booking:    BookingDataSchema,
+    contact:    ContactDataSchema,
+    newsletter: NewsletterDataSchema,
+  } as const;
+
+  let validatedData: Record<string, unknown>;
+  try {
+    validatedData = dataSchemaMap[type].parse(data) as Record<string, unknown>;
+  } catch (err) {
+    if (err instanceof ZodError) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid data payload.', details: err.flatten().fieldErrors },
+        { status: 400 },
+      );
+    }
+    throw err;
+  }
+
   try {
     const promises: Promise<unknown>[] = [];
 
     if (type === 'booking') {
       const { adminPayload, customerPayload } = getBookingEmailPayloads(
-        data as Record<string, unknown>,
+        validatedData,
         adminEmails,
         fromEmail,
         businessName
@@ -84,7 +110,7 @@ export async function POST(request: Request) {
       );
     } else if (type === 'contact') {
       const adminPayload = getContactEmailPayload(
-        data as Record<string, unknown>,
+        validatedData,
         adminEmails,
         fromEmail,
         businessName
@@ -92,7 +118,7 @@ export async function POST(request: Request) {
       promises.push(resend.emails.send(adminPayload));
     } else if (type === 'newsletter') {
       const { adminPayload, customerPayload } = getNewsletterEmailPayloads(
-        data as Record<string, unknown>,
+        validatedData,
         adminEmails,
         fromEmail,
         businessName

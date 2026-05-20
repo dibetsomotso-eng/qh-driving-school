@@ -4,15 +4,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useState } from 'react';
-import { useAuth } from '@/firebase';
-import { signInWithEmailAndPassword, AuthError } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
+import { useInsForge } from '@/insforge/provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -22,7 +21,8 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const auth = useAuth();
+  const { refresh } = useInsForge();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -34,18 +34,25 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, data.email, data.password);
-      // The layout will handle redirection
-    } catch (error) {
-      const authError = error as AuthError;
-      let message = 'An unknown error occurred.';
-      if (authError.code === 'auth/wrong-password' || authError.code === 'auth/user-not-found' || authError.code === 'auth/invalid-credential') {
-        message = 'Invalid email or password.';
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        throw new Error('Invalid email or password.');
       }
+
+      // Sync auth state into context before redirecting
+      await refresh();
+      router.replace('/admin');
+    } catch (err) {
       toast({
         variant: 'destructive',
         title: 'Login Failed',
-        description: message,
+        description: err instanceof Error ? err.message : 'An unknown error occurred.',
       });
       setIsLoading(false);
     }

@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Mail, Phone, Loader2 } from "lucide-react";
-import { collection, addDoc } from "firebase/firestore";
 import { useState } from "react";
 
 import { useToast } from "@/hooks/use-toast";
@@ -28,31 +27,47 @@ import {
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Icons } from "@/components/icons";
-import { useFirestore } from "@/firebase";
-import { errorEmitter } from "@/firebase/error-emitter";
-import { FirestorePermissionError } from "@/firebase/errors";
 
+const SA_PHONE_REGEX = /^(\+27|0)[6-8][0-9]{8}$/;
+
+const INQUIRY_TYPES = [
+  'code-a-b-eb', 'code-c1-ec', 'learners', 'renewals', 'other',
+] as const;
 
 const contactFormSchema = z.object({
-  fullName: z.string().min(2, "Full name must be at least 2 characters."),
-  phone: z.string().min(10, "Please enter a valid phone number."),
-  email: z.string().email("Please enter a valid email address."),
-  licenseType: z.string().min(1, "Please select a license type."),
-  message: z.string().min(10, "Message must be at least 10 characters.").max(500),
+  fullName: z
+    .string()
+    .trim()
+    .min(2, "Full name must be at least 2 characters.")
+    .max(100, "Full name must be 100 characters or fewer."),
+  phone: z
+    .string()
+    .regex(SA_PHONE_REGEX, "Please enter a valid SA phone number (e.g. 0812345678)."),
+  email: z
+    .string()
+    .email("Please enter a valid email address.")
+    .max(254, "Email address is too long."),
+  licenseType: z.enum(INQUIRY_TYPES, {
+    errorMap: () => ({ message: "Please select a valid license type." }),
+  }),
+  message: z
+    .string()
+    .trim()
+    .min(10, "Message must be at least 10 characters.")
+    .max(1000, "Message must be 1000 characters or fewer."),
 });
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 const defaultValues: Partial<ContactFormValues> = {
-    fullName: "",
-    phone: "",
-    email: "",
-    licenseType: "",
-    message: "",
+  fullName: "",
+  phone: "",
+  email: "",
+  licenseType: "",
+  message: "",
 };
 
 export default function ContactPage() {
-  const firestore = useFirestore();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -61,65 +76,32 @@ export default function ContactPage() {
     defaultValues,
   });
 
-  const onSubmit = (data: ContactFormValues) => {
+  const onSubmit = async (data: ContactFormValues) => {
     setIsSubmitting(true);
-    if (!firestore) {
+    try {
+      const submissionData = { ...data, submissionDate: new Date().toISOString() };
+      const res = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notificationType: 'contact', data: submissionData }),
+      });
+      if (!res.ok) throw new Error('Email send failed');
+      toast({
+        title: "Message Sent!",
+        description: "Thanks for reaching out. We'll get back to you shortly.",
+      });
+      form.reset();
+    } catch {
       toast({
         variant: "destructive",
         title: "Submission Error",
-        description: "Firestore is not available. Please try again later.",
+        description: "There was a problem sending your message. Please try again later.",
       });
+    } finally {
       setIsSubmitting(false);
-      return;
     }
-
-    const submissionData = {
-        ...data,
-        submissionDate: new Date().toISOString(),
-    };
-
-    addDoc(collection(firestore, "contactSubmissions"), submissionData)
-        .then((docRef) => {
-            toast({
-              title: "Message Sent!",
-              description: "Thanks for reaching out. We'll get back to you shortly.",
-            });
-            form.reset();
-            
-            // Send notification email
-            fetch('/api/send-email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  notificationType: 'contact',
-                  data: submissionData
-                }),
-            }).then(res => res.json()).then(response => {
-                if (!response.success) {
-                    console.error("Email Error: Could not send contact notification email.");
-                }
-            }).catch(err => {
-                console.error("Fetch Error: Could not send contact notification email.", err);
-            });
-        })
-        .catch((error) => {
-            const permissionError = new FirestorePermissionError({
-              path: 'contactSubmissions',
-              operation: 'create',
-              requestResourceData: submissionData,
-            });
-            errorEmitter.emit('permission-error', permissionError);
-            toast({
-              variant: "destructive",
-              title: "Submission Error",
-              description: "There was a problem sending your message. Please try again later.",
-            });
-        })
-        .finally(() => {
-            setIsSubmitting(false);
-        });
   };
-  
+
   return (
     <>
       <section className="bg-card py-16 md:py-24">
@@ -170,7 +152,7 @@ export default function ContactPage() {
                             </FormItem>
                           )}
                         />
-                         <FormField
+                        <FormField
                           control={form.control}
                           name="email"
                           render={({ field }) => (
@@ -185,29 +167,29 @@ export default function ContactPage() {
                         />
                       </div>
                       <FormField
-                          control={form.control}
-                          name="licenseType"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>License Type Interested In</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select a license type" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="code-a-b-eb">Code A, B & EB</SelectItem>
-                                  <SelectItem value="code-c1-ec">Code C1 & Code EC</SelectItem>
-                                  <SelectItem value="learners">Learner&apos;s License</SelectItem>
-                                  <SelectItem value="renewals">License Renewal</SelectItem>
-                                  <SelectItem value="other">Other</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                        control={form.control}
+                        name="licenseType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>License Type Interested In</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a license type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="code-a-b-eb">Code A, B & EB</SelectItem>
+                                <SelectItem value="code-c1-ec">Code C1 & Code EC</SelectItem>
+                                <SelectItem value="learners">Learner&apos;s License</SelectItem>
+                                <SelectItem value="renewals">License Renewal</SelectItem>
+                                <SelectItem value="other">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                       <FormField
                         control={form.control}
                         name="message"

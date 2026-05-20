@@ -6,54 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { useMemoFirebase } from '@/firebase/provider';
-import { useFirestore } from '@/firebase';
-import { collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { use, useEffect, useState } from 'react';
+import { use } from 'react';
 import { type BlogPost } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCollection } from '@/insforge';
 
 export default function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
-  const firestore = useFirestore();
-  const [post, setPost] = useState<BlogPost | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [notFound404, setNotFound404] = useState(false);
+  const { data: posts, isLoading } = useCollection<BlogPost>('/api/blog-posts');
 
-  const postQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(
-      collection(firestore, 'blogPosts'),
-      where('slug', '==', slug),
-      limit(1)
-    );
-  }, [firestore, slug]);
-
-  useEffect(() => {
-    const fetchPost = async () => {
-      setIsLoading(true);
-      setNotFound404(false);
-
-      if (postQuery) {
-        try {
-          const snapshot = await getDocs(postQuery);
-          if (!snapshot.empty) {
-            const doc = snapshot.docs[0];
-            setPost({ ...doc.data() as BlogPost, id: doc.id });
-            setIsLoading(false);
-            return;
-          }
-        } catch (err) {
-          console.error('Firestore fetch failed:', err);
-        }
-      }
-
-      setNotFound404(true);
-      setIsLoading(false);
-    };
-
-    fetchPost();
-  }, [postQuery, slug]);
+  const post = posts?.find((p) => p.slug === slug) ?? null;
+  const notFound404 = !isLoading && posts !== null && !post;
 
   if (isLoading) {
     return (

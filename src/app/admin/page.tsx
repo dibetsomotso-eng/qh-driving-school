@@ -2,9 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useCollection } from '@/firebase';
-import { collection, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
-import { useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection } from '@/insforge/use-collection';
 import { type BlogPost } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,46 +25,36 @@ import {
 } from '@/components/ui/alert-dialog';
 import { PlusCircle, Edit, Trash2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 
 export default function AdminDashboard() {
-  const firestore = useFirestore();
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [postToDelete, setPostToDelete] = useState<string | null>(null);
 
-  const postsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'blogPosts'), orderBy('publishedAt', 'desc'));
-  }, [firestore]);
+  const { data: posts, isLoading, refresh } = useCollection<BlogPost>('/api/blog-posts');
 
-  const { data: posts, isLoading } = useCollection<BlogPost>(postsQuery);
-
-  const handleDelete = () => {
-    if (!firestore || !postToDelete) return;
-
-    const docRef = doc(firestore, 'blogPosts', postToDelete);
+  const handleDelete = async () => {
+    if (!postToDelete) return;
     setIsDeleting(postToDelete);
 
-    deleteDoc(docRef)
-      .then(() => {
-        toast({ title: 'Success', description: 'Blog post deleted.' });
-      })
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: docRef.path,
-          operation: 'delete',
-        });
-        errorEmitter.emit('permission-error', permissionError);
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not delete post.' });
-      })
-      .finally(() => {
-        setIsDeleting(null);
-        setPostToDelete(null);
-        setShowDeleteAlert(false);
+    try {
+      const res = await fetch(`/api/blog-posts/${postToDelete}`, {
+        method: 'DELETE',
+        credentials: 'include',
       });
+
+      if (!res.ok) throw new Error('Delete failed');
+
+      toast({ title: 'Success', description: 'Blog post deleted.' });
+      refresh();
+    } catch {
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not delete post.' });
+    } finally {
+      setIsDeleting(null);
+      setPostToDelete(null);
+      setShowDeleteAlert(false);
+    }
   };
 
   const confirmDelete = (postId: string) => {
@@ -88,7 +76,7 @@ export default function AdminDashboard() {
 
       {isLoading ? (
         <div className="flex justify-center">
-            <Loader2 className="h-8 w-8 animate-spin" />
+          <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       ) : (
         <div className="border rounded-lg">
@@ -101,37 +89,45 @@ export default function AdminDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {posts && posts.map((post) => (
-                <TableRow key={post.id}>
-                  <TableCell className="font-medium">{post.title}</TableCell>
-                  <TableCell>{new Date(post.publishedAt).toLocaleDateString()}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/admin/edit?id=${post.id}`}>
-                        <Edit className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => confirmDelete(post.id)}
-                      disabled={isDeleting === post.id}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      {isDeleting === post.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {posts &&
+                posts.map((post) => (
+                  <TableRow key={post.id}>
+                    <TableCell className="font-medium">{post.title}</TableCell>
+                    <TableCell>
+                      {new Date(post.publishedAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" asChild>
+                        <Link href={`/admin/edit?id=${post.id}`}>
+                          <Edit className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => confirmDelete(post.id)}
+                        disabled={isDeleting === post.id}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        {isDeleting === post.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </div>
       )}
-       {!isLoading && (!posts || posts.length === 0) && (
+
+      {!isLoading && (!posts || posts.length === 0) && (
         <div className="text-center py-12 text-muted-foreground">
-            <p>No blog posts yet. Create one to get started!</p>
+          <p>No blog posts yet. Create one to get started!</p>
         </div>
-        )}
+      )}
 
       <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
         <AlertDialogContent>

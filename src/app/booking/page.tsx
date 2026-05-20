@@ -7,8 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2, CheckCircle2 } from "lucide-react";
-import { collection, addDoc } from "firebase/firestore";
-
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -23,9 +21,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useFirestore } from "@/firebase";
-import { errorEmitter } from "@/firebase/error-emitter";
-import { FirestorePermissionError } from "@/firebase/errors";
 
 // ─── Validation ──────────────────────────────────────────────────────────────
 
@@ -35,11 +30,18 @@ const bookingFormSchema = z.object({
   serviceCategory: z.enum(["driving", "vehicle"], {
     required_error: "Please select a service category.",
   }),
-  fullName: z.string().min(2, "Full name must be at least 2 characters."),
+  fullName: z
+    .string()
+    .trim()
+    .min(2, "Full name must be at least 2 characters.")
+    .max(100, "Full name must be 100 characters or fewer."),
   phone: z
     .string()
     .regex(SA_PHONE_REGEX, "Please enter a valid SA phone number (e.g. 0812345678)."),
-  email: z.string().email("Please enter a valid email address."),
+  email: z
+    .string()
+    .email("Please enter a valid email address.")
+    .max(254, "Email address is too long."),
   licenseType: z.string().min(1, "Please select a service."),
   preferredDate: z.date({ required_error: "A preferred date is required." }),
   preferredTime: z.string().min(1, "Please select a time slot."),
@@ -130,7 +132,6 @@ function ProgressIndicator({ currentStep }: { currentStep: 1 | 2 | 3 }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function BookingPage() {
-  const firestore = useFirestore();
   const { toast } = useToast();
 
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
@@ -170,32 +171,23 @@ export default function BookingPage() {
   const onSubmit = async (data: BookingFormValues) => {
     setIsSubmitting(true);
 
-    if (!firestore) {
-      toast({
-        variant: "destructive",
-        title: "Submission Error",
-        description: "Service unavailable. Please try again later.",
-      });
-      setIsSubmitting(false);
-      return;
-    }
-
     const bookingData = {
       ...data,
-      preferredDate: format(data.preferredDate, "PPP"),
+      preferredDate: format(data.preferredDate, "yyyy-MM-dd"),
       bookingDate: new Date().toISOString(),
     };
 
-    let docRef;
+    let bookingId: string | undefined;
     try {
-      docRef = await addDoc(collection(firestore, "bookings"), bookingData);
-    } catch (error) {
-      const permissionError = new FirestorePermissionError({
-        path: "bookings",
-        operation: "create",
-        requestResourceData: bookingData,
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData),
       });
-      errorEmitter.emit("permission-error", permissionError);
+      if (!res.ok) throw new Error('Booking failed');
+      const created = await res.json();
+      bookingId = created.id;
+    } catch {
       toast({
         variant: "destructive",
         title: "Submission Error",
@@ -205,21 +197,15 @@ export default function BookingPage() {
       return;
     }
 
-    try {
-      await fetch('/api/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          notificationType: 'booking',
-          data: {
-            ...bookingData,
-            bookingId: docRef.id,
-          },
-        }),
-      });
-    } catch {
-      // Email failure is non-blocking — booking is already saved to Firestore
-    }
+    // Send confirmation email (non-blocking)
+    fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        notificationType: 'booking',
+        data: { ...bookingData, bookingId },
+      }),
+    }).catch(() => {});
 
     setIsSuccess(true);
     setIsSubmitting(false);

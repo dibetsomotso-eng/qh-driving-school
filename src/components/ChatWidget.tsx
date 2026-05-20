@@ -24,8 +24,10 @@ export function ChatWidget() {
     }
   }, [messages, isOpen]);
 
+  const MAX_MESSAGE_LENGTH = 2000;
+
   const sendMessage = async () => {
-    const text = input.trim();
+    const text = input.trim().slice(0, MAX_MESSAGE_LENGTH);
     if (!text || isLoading) return;
 
     const userMessage: ChatMessage = { role: 'user', content: text };
@@ -124,6 +126,7 @@ export function ChatWidget() {
               placeholder="Ask a question..."
               className="flex-1 text-sm"
               disabled={isLoading}
+              maxLength={MAX_MESSAGE_LENGTH}
               autoFocus
             />
             <Button

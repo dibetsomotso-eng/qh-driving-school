@@ -12,13 +12,13 @@ export const ai = genkit({
 
 export const ChatMessageSchema = z.object({
   role: z.enum(['user', 'model']),
-  content: z.string(),
+  content: z.string().min(1).max(2000),
 });
 
 export type ChatMessage = z.infer<typeof ChatMessageSchema>;
 
 export const ChatRequestSchema = z.object({
-  messages: z.array(ChatMessageSchema).min(1),
+  messages: z.array(ChatMessageSchema).min(1).max(50),
 });
 
 export async function runChatFlow(messages: ChatMessage[]): Promise<string> {
@@ -63,7 +63,7 @@ GUIDELINES:
     // Log AI usage for cost monitoring
     if (usage) {
       await logUsage('genkit-ai', 'chat-generate', usage.totalTokens, {
-        promptTokens: usage.promptTokens,
+        promptTokens: usage.inputTokens,
         completionTokens: usage.outputTokens,
       });
     }

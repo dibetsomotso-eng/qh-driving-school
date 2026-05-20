@@ -3,25 +3,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useCollection } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { useCollection } from '@/insforge';
 import { type BlogPost } from '@/lib/data';
-import { useMemoFirebase } from '@/firebase/provider';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function BlogPage() {
-  const firestore = useFirestore();
-
-  const postsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(
-      collection(firestore, 'blogPosts'),
-      orderBy('publishedAt', 'desc')
-    );
-  }, [firestore]);
-
-  const { data: posts, isLoading } = useCollection<BlogPost>(postsQuery);
+  const { data: posts, isLoading } = useCollection<BlogPost>('/api/blog-posts');
 
   return (
     <>

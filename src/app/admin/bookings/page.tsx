@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { collection, query, orderBy, deleteDoc, updateDoc, doc } from 'firebase/firestore';
-import { useFirestore, useMemoFirebase, useCollection } from '@/firebase';
+import { useCollection } from '@/insforge/use-collection';
 import { type Booking, type BookingStatus } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -33,8 +32,6 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Trash2, Loader2, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 
 const STATUS_CONFIG: Record<BookingStatus, { label: string; variant: 'outline' | 'default' | 'destructive' }> = {
   pending:   { label: 'Pending',   variant: 'outline' },
@@ -43,15 +40,14 @@ const STATUS_CONFIG: Record<BookingStatus, { label: string; variant: 'outline' |
 };
 
 const TIME_LABELS: Record<string, string> = {
-  morning:        'Morning (8am–12pm)',
-  afternoon:      'Afternoon (12pm–4pm)',
+  morning:          'Morning (8am–12pm)',
+  afternoon:        'Afternoon (12pm–4pm)',
   'late-afternoon': 'Late Afternoon (4pm–6pm)',
 };
 
 type FilterTab = 'all' | 'driving' | 'vehicle';
 
 export default function BookingsDashboard() {
-  const firestore = useFirestore();
   const { toast } = useToast();
 
   const [filter, setFilter] = useState<FilterTab>('all');
@@ -60,30 +56,30 @@ export default function BookingsDashboard() {
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [bookingToDelete, setBookingToDelete] = useState<string | null>(null);
 
-  const bookingsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'bookings'), orderBy('bookingDate', 'desc'));
-  }, [firestore]);
-
-  const { data: bookings, isLoading } = useCollection<Booking>(bookingsQuery);
+  const { data: bookings, isLoading, refresh } = useCollection<Booking>('/api/bookings');
 
   const filtered = bookings
     ? filter === 'all'
       ? bookings
-      : bookings.filter(b => b.serviceCategory === filter)
+      : bookings.filter((b) => b.serviceCategory === filter)
     : [];
 
-  const handleStatusChange = (bookingId: string, newStatus: BookingStatus) => {
-    if (!firestore) return;
-    const docRef = doc(firestore, 'bookings', bookingId);
+  const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
     setUpdatingStatus(bookingId);
-    updateDoc(docRef, { status: newStatus })
-      .catch(async () => {
-        const permissionError = new FirestorePermissionError({ path: docRef.path, operation: 'update' });
-        errorEmitter.emit('permission-error', permissionError);
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not update status.' });
-      })
-      .finally(() => setUpdatingStatus(null));
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) throw new Error('Update failed');
+      refresh();
+    } catch {
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not update status.' });
+    } finally {
+      setUpdatingStatus(null);
+    }
   };
 
   const confirmDelete = (bookingId: string) => {
@@ -91,24 +87,24 @@ export default function BookingsDashboard() {
     setShowDeleteAlert(true);
   };
 
-  const handleDelete = () => {
-    if (!firestore || !bookingToDelete) return;
-    const docRef = doc(firestore, 'bookings', bookingToDelete);
+  const handleDelete = async () => {
+    if (!bookingToDelete) return;
     setIsDeleting(bookingToDelete);
-    deleteDoc(docRef)
-      .then(() => {
-        toast({ title: 'Success', description: 'Booking deleted.' });
-      })
-      .catch(async () => {
-        const permissionError = new FirestorePermissionError({ path: docRef.path, operation: 'delete' });
-        errorEmitter.emit('permission-error', permissionError);
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not delete booking.' });
-      })
-      .finally(() => {
-        setIsDeleting(null);
-        setBookingToDelete(null);
-        setShowDeleteAlert(false);
+    try {
+      const res = await fetch(`/api/bookings/${bookingToDelete}`, {
+        method: 'DELETE',
+        credentials: 'include',
       });
+      if (!res.ok) throw new Error('Delete failed');
+      toast({ title: 'Success', description: 'Booking deleted.' });
+      refresh();
+    } catch {
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not delete booking.' });
+    } finally {
+      setIsDeleting(null);
+      setBookingToDelete(null);
+      setShowDeleteAlert(false);
+    }
   };
 
   return (
@@ -167,7 +163,9 @@ export default function BookingsDashboard() {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">{booking.preferredDate}</div>
-                      <div className="text-xs text-muted-foreground">{TIME_LABELS[booking.preferredTime] ?? booking.preferredTime}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {TIME_LABELS[booking.preferredTime] ?? booking.preferredTime}
+                      </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {new Date(booking.bookingDate).toLocaleDateString()}
@@ -175,7 +173,12 @@ export default function BookingsDashboard() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-auto p-0" disabled={updatingStatus === booking.id}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-auto p-0"
+                            disabled={updatingStatus === booking.id}
+                          >
                             {updatingStatus === booking.id ? (
                               <Loader2 className="h-3 w-3 animate-spin mr-1" />
                             ) : null}
@@ -206,9 +209,11 @@ export default function BookingsDashboard() {
                         disabled={isDeleting === booking.id}
                         className="text-destructive hover:text-destructive"
                       >
-                        {isDeleting === booking.id
-                          ? <Loader2 className="h-4 w-4 animate-spin" />
-                          : <Trash2 className="h-4 w-4" />}
+                        {isDeleting === booking.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
                       </Button>
                     </TableCell>
                   </TableRow>

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Toaster } from '@/components/ui/toaster';
 import { SiteChromeHeader, SiteChromeFooter } from '@/components/layout/site-chrome';
 import { ThemeProvider } from '@/components/theme-provider';
-import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { InsForgeClientProvider } from '@/insforge/client-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -25,7 +25,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=PT+Sans:wght@400;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <FirebaseClientProvider>
+        <InsForgeClientProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -37,7 +37,7 @@ export default function RootLayout({
             <SiteChromeFooter />
             <Toaster />
           </ThemeProvider>
-        </FirebaseClientProvider>
+        </InsForgeClientProvider>
       </body>
     </html>
   );
